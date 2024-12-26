@@ -1,5 +1,8 @@
 package agh.fcs.oop.model;
 
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 public enum MapDirection {
     NORTH,
     NORTHEAST,
@@ -39,5 +42,10 @@ public enum MapDirection {
             case WEST -> new Vector2d(-1,0);
             case NORTHWEST -> new Vector2d(-1,1);
         };
+    }
+
+    public static MapDirection randomDirection()  {
+        MapDirection[] directions = values();
+        return directions[ThreadLocalRandom.current().nextInt(directions.length)];
     }
 }

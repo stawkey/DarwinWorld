@@ -92,6 +92,16 @@ public class World implements WorldMap {
         }
     }
 
+    public void removeAnimal(Animal animal) {
+        if (animal.getPosition() != null) {
+            animalMap.remove(animal.getPosition(), animal);
+        }
+    }
+
+    public void removeGrass(Vector2d position) {
+        grassMap.remove(position);
+    }
+
     public WorldElement objectAt(Vector2d position) {
         if (animalMap.get(position) != null) return animalMap.get(position);
         else if (grassMap.get(position) != null) return grassMap.get(position);
@@ -101,7 +111,7 @@ public class World implements WorldMap {
     @Override
     public void move(Animal animal) {
         Vector2d prevPosition = animal.getPosition();
-        animal.move(this, this);
+        animal.move(this);
         animalMap.remove(prevPosition);
         animalMap.put(animal.getPosition(), animal);
     }

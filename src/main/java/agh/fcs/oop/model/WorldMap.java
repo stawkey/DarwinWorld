@@ -12,7 +12,7 @@ import java.util.UUID;
  *
  * @author apohllo, idzik
  */
-public interface WorldMap extends MoveValidator {
+public interface WorldMap {
 
     /**
      * Place a animal on the map.
@@ -48,6 +48,7 @@ public interface WorldMap extends MoveValidator {
 
     Map<Vector2d, WorldElement> getElements();
 
+    boolean canMoveTo(Vector2d position);
 
     int getID();
 
