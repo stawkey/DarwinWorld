@@ -2,18 +2,18 @@ package agh.fcs.oop.model;
 
 import java.util.*;
 
-public class RandomPositionGenerator implements Iterator<Vector2d>, Iterable<Vector2d> {
+public class StartingGrassGenerator implements Iterator<Vector2d>, Iterable<Vector2d> {
 
-    private final int minWidth;
-    private final int minHeight;
-    private final int maxWidth;
-    private final int maxHeight;
-    private final int grassCount;
-    private List<Vector2d> possiblePlaces;
-    private int counter = 0;
-    private Random random = new Random();
+    protected final int minWidth;
+    protected final int minHeight;
+    protected final int maxWidth;
+    protected final int maxHeight;
+    protected final int grassCount;
+    protected List<Vector2d> possiblePlaces;
+    protected int counter = 0;
+    protected Random random = new Random();
 
-    public RandomPositionGenerator(int minWidth, int minHeight, int maxWidth, int maxHeight, int grassCount) {
+    public StartingGrassGenerator(int minWidth, int minHeight, int maxWidth, int maxHeight, int grassCount) {
         this.minWidth = minWidth;
         this.minHeight = minHeight;
         this.maxWidth = maxWidth;
@@ -34,17 +34,19 @@ public class RandomPositionGenerator implements Iterator<Vector2d>, Iterable<Vec
                 positions.add(new Vector2d(x, y));
             }
         }
+//        System.out.println(positions);
         return positions;
     }
 
     @Override
     public boolean hasNext() {
-        return counter < grassCount;
+        return counter < grassCount && !possiblePlaces.isEmpty();
     }
 
     @Override
     public Vector2d next() {
         if (hasNext()) {
+//            System.out.println(possiblePlaces.size());
             int chosenPlace = random.nextInt(possiblePlaces.size());
             Vector2d generatedVector = possiblePlaces.get(chosenPlace);
             possiblePlaces.remove(chosenPlace);

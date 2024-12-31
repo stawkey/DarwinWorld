@@ -24,8 +24,8 @@ public class Simulation {
         this.animalList = new ArrayList<>();
 
         for (int i = 0; i < startAnimalCount; i++) {
-            Vector2d position = new Vector2d(ThreadLocalRandom.current().nextInt(-width / 2, width / 2),
-                    ThreadLocalRandom.current().nextInt(-height / 2, height / 2));
+            Vector2d position = new Vector2d(ThreadLocalRandom.current().nextInt(0, width - 1),
+                    ThreadLocalRandom.current().nextInt(0, height - 1));
             animalList.add(new Animal(position, startAnimalEnergy, energyUsedForReproduction, minMutationCount, maxMutationCount, geneLength));
         }
 
@@ -76,5 +76,10 @@ public class Simulation {
                 .forEach(pair -> {
                     pair.get(0).reproduce(pair.get(1));
                 });
+
+        // generating new grasses
+//        System.out.println("Before: " + world.getGrassMap());
+        world.generatingGrasses(grassGrowth);
+//        System.out.println("After: " + world.getGrassMap());
     }
 }
