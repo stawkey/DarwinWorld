@@ -1,6 +1,5 @@
 package agh.fcs.oop.model;
 
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public enum MapDirection {
@@ -15,10 +14,10 @@ public enum MapDirection {
 
     public String toString() {
         return switch (this) {
-            case NORTH -> "North";
-            case NORTHEAST -> "Northeast";
-            case EAST -> "East";
-            case SOUTHEAST -> "Southeast";
+            case NORTH -> "↑";
+            case NORTHEAST -> "↑";
+            case EAST -> "↑";
+            case SOUTHEAST -> "↑";
             case SOUTH -> "South";
             case SOUTHWEST -> "Southwest";
             case WEST -> "West";

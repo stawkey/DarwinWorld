@@ -29,25 +29,28 @@ public class World implements WorldMap {
         this.upperRight = new Vector2d(width - 1, height - 1);
 //        double equatorHeight = Math.ceil(height * 1.0 /5);
 //        TODO: some bugfixing with equators
-        this.equatorLeftCorner = new Vector2d(0, (int)Math.ceil(0.4 * height));
-        this.equatorRightCorner = new Vector2d(width - 1, (int)Math.floor(0.6 * height));
+        this.equatorLeftCorner = new Vector2d(0, (int) Math.ceil(0.4 * height));
+        this.equatorRightCorner = new Vector2d(width - 1, (int) Math.floor(0.6 * height));
         this.startingGrassAmount = startingGrassAmount;
-        int equatorStartingGrasses = (int)Math.ceil(startingGrassAmount * 0.8);
+        int equatorStartingGrasses = (int) Math.ceil(startingGrassAmount * 0.8);
         int otherStartingGrasses = startingGrassAmount - equatorStartingGrasses;
 
-        StartingGrassGenerator equatorPositionGenerator = new StartingGrassGenerator(equatorLeftCorner.x(), equatorLeftCorner.y(), equatorRightCorner.x(), equatorRightCorner.y(), equatorStartingGrasses);
+        StartingGrassGenerator equatorPositionGenerator = new StartingGrassGenerator(equatorLeftCorner.x(),
+                equatorLeftCorner.y(), equatorRightCorner.x(), equatorRightCorner.y(), equatorStartingGrasses);
         for (Vector2d grassPosition : equatorPositionGenerator) {
             grassMap.put(grassPosition, new Grass(grassPosition));
         }
         int upperOtherGrasses = (int) (Math.random() * otherStartingGrasses);
         int lowerOtherGrasses = otherStartingGrasses = upperOtherGrasses;
 
-        StartingGrassGenerator upperPositionGenerator = new StartingGrassGenerator(0, equatorRightCorner.y() + 1, width - 1, height - 1, upperOtherGrasses);
+        StartingGrassGenerator upperPositionGenerator = new StartingGrassGenerator(0, equatorRightCorner.y() + 1,
+                width - 1, height - 1, upperOtherGrasses);
         for (Vector2d grassPosition : upperPositionGenerator) {
             grassMap.put(grassPosition, new Grass(grassPosition));
         }
 
-        StartingGrassGenerator lowerPositionGenerator = new StartingGrassGenerator(0, 0, width - 1, equatorLeftCorner.y(), lowerOtherGrasses);
+        StartingGrassGenerator lowerPositionGenerator = new StartingGrassGenerator(0, 0, width - 1,
+                equatorLeftCorner.y(), lowerOtherGrasses);
         for (Vector2d grassPosition : lowerPositionGenerator) {
             grassMap.put(grassPosition, new Grass(grassPosition));
         }
@@ -84,10 +87,11 @@ public class World implements WorldMap {
     }
 
     public void generatingGrasses(int grassGrowth) {
-        int equatorGrasses = (int)Math.ceil(grassGrowth * 0.8);
+        int equatorGrasses = (int) Math.ceil(grassGrowth * 0.8);
         int tempGrassAmount = grassMap.size();
 
-        GeneralGrassGenerator equatorPositionGenerator = new GeneralGrassGenerator(equatorLeftCorner.x(), equatorLeftCorner.y(), equatorRightCorner.x(), equatorRightCorner.y(), equatorGrasses, grassMap);
+        GeneralGrassGenerator equatorPositionGenerator = new GeneralGrassGenerator(equatorLeftCorner.x(),
+                equatorLeftCorner.y(), equatorRightCorner.x(), equatorRightCorner.y(), equatorGrasses, grassMap);
         for (Vector2d grassPosition : equatorPositionGenerator) {
             grassMap.put(grassPosition, new Grass(grassPosition));
         }
@@ -95,11 +99,12 @@ public class World implements WorldMap {
         int placedGrasses = grassMap.size() - tempGrassAmount;
         int otherGrasses = grassGrowth - placedGrasses;
 //        System.out.println(otherGrasses);
-        int upperOtherGrasses = (int)Math.round(Math.random() * otherGrasses);
+        int upperOtherGrasses = (int) Math.round(Math.random() * otherGrasses);
 //        System.out.println(upperOtherGrasses);
         tempGrassAmount = grassMap.size();
 
-        GeneralGrassGenerator upperPositionGenerator = new GeneralGrassGenerator(0, equatorRightCorner.y() + 1, width - 1, height - 1, upperOtherGrasses, grassMap);
+        GeneralGrassGenerator upperPositionGenerator = new GeneralGrassGenerator(0, equatorRightCorner.y() + 1,
+                width - 1, height - 1, upperOtherGrasses, grassMap);
         for (Vector2d grassPosition : upperPositionGenerator) {
             grassMap.put(grassPosition, new Grass(grassPosition));
         }
@@ -107,7 +112,8 @@ public class World implements WorldMap {
         placedGrasses = grassMap.size() - tempGrassAmount;
         int lowerOtherGrasses = otherGrasses - placedGrasses;
 
-        GeneralGrassGenerator lowerPositionGenerator = new GeneralGrassGenerator(0, 0, width - 1, equatorLeftCorner.y(), lowerOtherGrasses, grassMap);
+        GeneralGrassGenerator lowerPositionGenerator = new GeneralGrassGenerator(0, 0, width - 1,
+                equatorLeftCorner.y(), lowerOtherGrasses, grassMap);
         for (Vector2d grassPosition : lowerPositionGenerator) {
             grassMap.put(grassPosition, new Grass(grassPosition));
         }
@@ -120,10 +126,9 @@ public class World implements WorldMap {
     public boolean place(Animal animal) throws IncorrectPositionException {
         if (canMoveTo(animal.getPosition())) {
             animalMap.put(animal.getPosition(), animal);
-            // notifyObservers
+            observersNotification("Placed an animal at " + animal.getPosition());
             return true;
-        }
-        else {
+        } else {
             throw new IncorrectPositionException(animal.getPosition());
         }
     }
@@ -147,9 +152,11 @@ public class World implements WorldMap {
     @Override
     public void move(Animal animal) {
         Vector2d prevPosition = animal.getPosition();
+        MapDirection prevDirection = animal.getFacingDirection();
         animal.move(this);
         animalMap.remove(prevPosition);
         animalMap.put(animal.getPosition(), animal);
+        observersNotification("Animal moved from " + prevPosition + " facing " + prevDirection + " to " + animal.getPosition() + " facing " + animal.getFacingDirection());
     }
 
     public boolean isOccupied(Vector2d position) {
@@ -168,8 +175,27 @@ public class World implements WorldMap {
         return allElements;
     }
 
+    public void observersNotification(String message) {
+        for (MapChangeListener observer : observers) {
+            observer.mapChanged(this, message);
+        }
+    }
+
+    public void addObserver(MapChangeListener observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(MapChangeListener observer) {
+        observers.remove(observer);
+    }
+
     public int getID() {
         return mapID;
+    }
+
+    @Override
+    public String toString() {
+        return visualizer.draw(bottomLeft, upperRight);
     }
 
 }

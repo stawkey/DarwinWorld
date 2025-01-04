@@ -16,17 +16,20 @@ public class Simulation {
     private final int grassGrowth;
     private final int minEnergyForReproduction;
 
-
     public Simulation(int width, int height, int startGrassCount, int startAnimalCount, int startAnimalEnergy,
                       int minReproductionEnergy, int energyUsedForReproduction, int minMutationCount,
                       int maxMutationCount, int grassEnergy, int grassGrowth, int geneLength) {
         this.world = new World(width, height, startGrassCount);
-        this.animalList = new ArrayList<>();
+        ConsoleMapDisplay observer = new ConsoleMapDisplay();
+        this.world.addObserver(observer);
 
+        this.animalList = new ArrayList<>();
+        AnimalConfig animalConfig = new AnimalConfig(startAnimalEnergy, energyUsedForReproduction, minMutationCount,
+                maxMutationCount, geneLength);
         for (int i = 0; i < startAnimalCount; i++) {
             Vector2d position = new Vector2d(ThreadLocalRandom.current().nextInt(0, width - 1),
                     ThreadLocalRandom.current().nextInt(0, height - 1));
-            animalList.add(new Animal(position, startAnimalEnergy, energyUsedForReproduction, minMutationCount, maxMutationCount, geneLength));
+            animalList.add(new Animal(position, animalConfig));
         }
 
         this.grassEnergy = grassEnergy;
@@ -77,7 +80,7 @@ public class Simulation {
                     pair.get(0).reproduce(pair.get(1));
                 });
 
-        // generating new grasses
+        // Generating new grass
 //        System.out.println("Before: " + world.getGrassMap());
         world.generatingGrasses(grassGrowth);
 //        System.out.println("After: " + world.getGrassMap());

@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Animal implements WorldElement {
-    private final int geneLength;
-    private final int energyUsedForReproduction;
-    private final int minMutationCount; // counted from 1 not 0
-    private final int maxMutationCount;
+    private final AnimalConfig animalConfig;
     private MapDirection facingDirection;
     private Vector2d position;
     private int energy;
@@ -16,33 +13,29 @@ public class Animal implements WorldElement {
     private int age = 0;
     private int childrenNumber = 0;
 
-    public Animal(Vector2d position, int startAnimalEnergy, int energyUsedForReproduction,
-                  int minMutationCount, int maxMutationCount, int geneLength) {
+    public Animal(Vector2d position, AnimalConfig animalConfig) {
         this.position = position;
         facingDirection = MapDirection.randomDirection();
-        energy = startAnimalEnergy;
-        this.energyUsedForReproduction = energyUsedForReproduction;
-        this.geneLength = geneLength;
-        this.minMutationCount = minMutationCount;
-        this.maxMutationCount = maxMutationCount;
 
-        currGene = ThreadLocalRandom.current().nextInt(geneLength);
-        for (int i = 0; i < this.geneLength; i++) {
+        this.animalConfig = animalConfig;
+        energy = animalConfig.getStartAnimalEnergy();
+
+        currGene = ThreadLocalRandom.current().nextInt(animalConfig.getGeneLength());
+        for (int i = 0; i < animalConfig.getGeneLength(); i++) {
             gene.add(ThreadLocalRandom.current().nextInt(8));
         }
     }
 
-    public Animal(Vector2d position, int startAnimalEnergy, int energyUsedForReproduction,
-                  int minMutationCount, int maxMutationCount, int geneLength, ArrayList<Integer> gene) {
+    // this constructor is going to be used for creating offspring
+    public Animal(Vector2d position, AnimalConfig animalConfig, ArrayList<Integer> gene) {
         this.position = position;
         facingDirection = MapDirection.randomDirection();
-        energy = startAnimalEnergy;
-        this.energyUsedForReproduction = energyUsedForReproduction;
+
+        this.animalConfig = animalConfig;
+        energy = animalConfig.getEnergyUsedForReproduction() * 2;
+
         this.gene = gene;
-        this.geneLength = geneLength;
-        this.minMutationCount = minMutationCount;
-        this.maxMutationCount = maxMutationCount;
-        currGene = ThreadLocalRandom.current().nextInt(geneLength);
+        currGene = ThreadLocalRandom.current().nextInt(animalConfig.getGeneLength());
     }
 
     public Vector2d getPosition() {
@@ -65,6 +58,19 @@ public class Animal implements WorldElement {
         return childrenNumber;
     }
 
+    public ArrayList<Integer> getGene() {
+        return gene;
+    }
+
+    public MapDirection getFacingDirection() {
+        return facingDirection;
+    }
+
+    public int getCurrGene() {
+        return currGene;
+    }
+
+
     // direction is a number in range 0-7 where 0 represents no rotation, 1 is a rotation by 45 deg
     // then moves forwards by 1 unit vector
     public void move(WorldMap world) {
@@ -72,28 +78,27 @@ public class Animal implements WorldElement {
         currGene++;
         currGene = currGene % gene.size();
 
-        this.facingDirection = this.facingDirection.rotateBy(direction);
-        Vector2d newPosition = this.position.add(this.facingDirection.toUnitVector());
+        facingDirection = facingDirection.rotateBy(direction);
+        Vector2d newPosition = this.position.add(facingDirection.toUnitVector());
         if (world.canMoveTo(newPosition)) {
-            this.position = newPosition;
-            this.energy--;
-            this.age++;
+            position = newPosition;
+            energy--;
+            age++;
         }
     }
 
     public void reproduce(Animal partner) {
-        int offspringEnergy = (int) (energyUsedForReproduction * 2);
-        this.energy -= energyUsedForReproduction;
-        partner.energy -= energyUsedForReproduction;
+        this.energy -= animalConfig.getEnergyUsedForReproduction();
+        partner.energy -= animalConfig.getEnergyUsedForReproduction();
 
         this.childrenNumber++;
         partner.childrenNumber++;
 
         double proportion = (double) this.energy / (this.energy + partner.energy);
-        int middlePoint = (int) (proportion * geneLength);
+        int middlePoint = (int) (proportion * animalConfig.getGeneLength());
 
         ArrayList<Integer> offspringGene = new ArrayList<>();
-        for (int i = 0; i < geneLength; i++) {
+        for (int i = 0; i < animalConfig.getGeneLength(); i++) {
             if (i < middlePoint) {
                 offspringGene.add(ThreadLocalRandom.current().nextBoolean() ? this.gene.get(i) : partner.gene.get(i));
             } else {
@@ -101,14 +106,14 @@ public class Animal implements WorldElement {
             }
         }
 
-        int mutations = ThreadLocalRandom.current().nextInt(minMutationCount + 1, maxMutationCount + 1);
+        int mutations = ThreadLocalRandom.current().nextInt(animalConfig.getMinMutationCount() + 1,
+                animalConfig.getMaxMutationCount() + 1);
         for (int i = 0; i < mutations; i++) {
-            int geneIndex = ThreadLocalRandom.current().nextInt(geneLength);
+            int geneIndex = ThreadLocalRandom.current().nextInt(animalConfig.getGeneLength());
             offspringGene.set(geneIndex, ThreadLocalRandom.current().nextInt(8));
         }
 
-        new Animal(this.position, offspringEnergy, energyUsedForReproduction,
-                minMutationCount, maxMutationCount, geneLength, offspringGene);
+        new Animal(this.position, animalConfig, offspringGene);
     }
 
     public boolean isAlive() {
