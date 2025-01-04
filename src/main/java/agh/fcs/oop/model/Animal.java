@@ -87,7 +87,7 @@ public class Animal implements WorldElement {
         }
     }
 
-    public void reproduce(Animal partner) {
+    public Animal reproduce(Animal partner) {
         this.energy -= animalConfig.getEnergyUsedForReproduction();
         partner.energy -= animalConfig.getEnergyUsedForReproduction();
 
@@ -113,7 +113,7 @@ public class Animal implements WorldElement {
             offspringGene.set(geneIndex, ThreadLocalRandom.current().nextInt(8));
         }
 
-        new Animal(this.position, animalConfig, offspringGene);
+        return new Animal(this.position, animalConfig, offspringGene);
     }
 
     public boolean isAlive() {

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-public class Simulation {
+public class Simulation implements Runnable {
     private final World world;
     private ArrayList<Animal> animalList;
     private final int grassEnergy;
@@ -32,57 +32,79 @@ public class Simulation {
             animalList.add(new Animal(position, animalConfig));
         }
 
+        for (Animal a : animalList) {
+            try {
+                world.place(a);
+            } catch (IncorrectPositionException e) {
+                System.out.println("Incorrect position: " + a.getPosition());
+            }
+        }
+
         this.grassEnergy = grassEnergy;
         this.grassGrowth = grassGrowth;
         this.minEnergyForReproduction = minReproductionEnergy;
     }
 
     public void run() {
-        // Remove dead animals
-        animalList.removeIf(animal -> {
-            if (!animal.isAlive()) {
+        while (!animalList.isEmpty()) {
+            // Remove dead animals
+            List<Animal> toRemove = animalList.stream()
+                    .filter(animal -> !animal.isAlive())
+                    .toList();
+
+            toRemove.forEach(animal -> {
                 world.removeAnimal(animal);
                 animalList.remove(animal);
-                return true;
+            });
+
+            // Animals movement
+            for (Animal animal : animalList) {
+                world.move(animal);
             }
-            return false;
-        });
 
-        // Animals movement
-        for (Animal animal : animalList) {
-            world.move(animal);
-        }
-
-        // Eating
-        Map<Vector2d, WorldElement> allElements = world.getElements();
-        for (Animal animal : animalList) {
-            Vector2d position = animal.getPosition();
-            if (allElements.get(position) instanceof Grass) {
-                animal.setEnergy(animal.getEnergy() + grassEnergy);
-                world.removeGrass(position);
+            // Eating
+            Map<Vector2d, WorldElement> allElements = world.getElements();
+            for (Animal animal : animalList) {
+                Vector2d position = animal.getPosition();
+                if (allElements.get(position) instanceof Grass) {
+                    animal.setEnergy(animal.getEnergy() + grassEnergy);
+                    world.removeGrass(position);
+                }
             }
-        }
 
-        // Reproduction
-        Map<Vector2d, List<Animal>> animalsGroupedByPosition = animalList.stream()
-                .filter(a -> a.getEnergy() > minEnergyForReproduction)
-                .collect(Collectors.groupingBy(Animal::getPosition));
+            // Reproduction
+            Map<Vector2d, List<Animal>> animalsGroupedByPosition = animalList.stream()
+                    .filter(a -> a.getEnergy() > minEnergyForReproduction)
+                    .collect(Collectors.groupingBy(Animal::getPosition));
 
-        animalsGroupedByPosition.values().stream()
-                .map(a -> a.stream()
-                        .sorted(Comparator.comparingInt(Animal::getEnergy).reversed()
-                                .thenComparingInt(Animal::getAge).reversed()
-                                .thenComparingInt(Animal::getChildrenNumber).reversed())
-                        .limit(2)
-                        .toList())
-                .filter(pair -> pair.size() == 2)
-                .forEach(pair -> {
-                    pair.get(0).reproduce(pair.get(1));
-                });
+            animalsGroupedByPosition.values().stream()
+                    .map(a -> a.stream()
+                            .sorted(Comparator.comparingInt(Animal::getEnergy).reversed()
+                                    .thenComparingInt(Animal::getAge).reversed()
+                                    .thenComparingInt(Animal::getChildrenNumber).reversed())
+                            .limit(2)
+                            .toList())
+                    .filter(pair -> pair.size() == 2)
+                    .forEach(pair -> {
+                        Animal offspring = pair.get(0).reproduce(pair.get(1));
+                        animalList.add(offspring);
+                        try {
+                            world.place(offspring);
+                        } catch (IncorrectPositionException e) {
+                            System.out.println("Incorrect position: " + offspring.getPosition());
+                        }
+                    });
 
-        // Generating new grass
+            // Generating new grass
 //        System.out.println("Before: " + world.getGrassMap());
-        world.generatingGrasses(grassGrowth);
+            world.generatingGrasses(grassGrowth);
 //        System.out.println("After: " + world.getGrassMap());
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+        }
     }
 }
