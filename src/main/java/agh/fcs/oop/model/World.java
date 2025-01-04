@@ -126,7 +126,7 @@ public class World implements WorldMap {
     public boolean place(Animal animal) throws IncorrectPositionException {
         if (canMoveTo(animal.getPosition())) {
             animalMap.put(animal.getPosition(), animal);
-            observersNotification("Placed an animal at " + animal.getPosition());
+            observersNotification("An animal has been born at:  " + animal.getPosition());
             return true;
         } else {
             throw new IncorrectPositionException(animal.getPosition());
@@ -156,7 +156,7 @@ public class World implements WorldMap {
         animal.move(this);
         animalMap.remove(prevPosition);
         animalMap.put(animal.getPosition(), animal);
-        observersNotification("Animal moved from " + prevPosition + " facing " + prevDirection + " to " + animal.getPosition() + " facing " + animal.getFacingDirection());
+        observersNotification("An animal moved from " + prevPosition + " facing " + prevDirection + " to " + animal.getPosition() + " facing " + animal.getFacingDirection());
     }
 
     public boolean isOccupied(Vector2d position) {
@@ -165,13 +165,8 @@ public class World implements WorldMap {
 
 
     public Map<Vector2d, WorldElement> getElements() {
-        for (Map.Entry<Vector2d, Animal> element : animalMap.entrySet()) {
-            allElements.put(element.getKey(), element.getValue());
-        }
-
-        for (Map.Entry<Vector2d, Grass> element : grassMap.entrySet()) {
-            allElements.put(element.getKey(), element.getValue());
-        }
+        allElements.putAll(animalMap);
+        allElements.putAll(grassMap);
         return allElements;
     }
 
