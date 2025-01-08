@@ -14,9 +14,10 @@ public class GeneralGrassGenerator implements Iterator<Vector2d>, Iterable<Vecto
     protected int counter = 0;
     protected Random random = new Random();
 
-    private Map<Vector2d, Grass> grassMap;
+    private final Map<Vector2d, Grass> grassMap;
 
-    public GeneralGrassGenerator(int minWidth, int minHeight, int maxWidth, int maxHeight, int grassCount, Map<Vector2d, Grass> grassMap) {
+    public GeneralGrassGenerator(int minWidth, int minHeight, int maxWidth, int maxHeight,
+                                 int grassCount, Map<Vector2d, Grass> grassMap) {
         this.minWidth = minWidth;
         this.minHeight = minHeight;
         this.maxWidth = maxWidth;
@@ -25,10 +26,6 @@ public class GeneralGrassGenerator implements Iterator<Vector2d>, Iterable<Vecto
         this.grassMap = grassMap;
         this.possiblePlaces = generatingPossibilities();
         Collections.shuffle(possiblePlaces);
-    }
-
-    public int getGrassCount() {
-        return grassCount;
     }
 
 //    public GeneralGrassGenerator(int minWidth, int minHeight, int maxWidth, int maxHeight, int grassCount, Map<Vector2d, Grass> grassMap) {

@@ -12,8 +12,8 @@ public class World implements WorldMap {
     private final int height;
     private final Vector2d bottomLeft;
     private final Vector2d upperRight;
-    private final Vector2d equatorLeftCorner;
-    private final Vector2d equatorRightCorner;
+    private Vector2d equatorLeftCorner;
+    private Vector2d equatorRightCorner;
     private final int startingGrassAmount;
     private Map<Vector2d, Animal> animalMap = new HashMap<>();
     private Map<Vector2d, Grass> grassMap = new HashMap<>();
@@ -29,37 +29,68 @@ public class World implements WorldMap {
         this.upperRight = new Vector2d(width - 1, height - 1);
 //        double equatorHeight = Math.ceil(height * 1.0 /5);
 //        TODO: some bugfixing with equators
-        this.equatorLeftCorner = new Vector2d(0, (int) Math.ceil(0.4 * height));
-        this.equatorRightCorner = new Vector2d(width - 1, (int) Math.floor(0.6 * height));
+        this.equatorLeftCorner = null;
+        this.equatorRightCorner = null;
+        if (height == 1 || height == 2) {
+            this.equatorLeftCorner = new Vector2d(0,0);
+            this.equatorRightCorner = new Vector2d(width - 1, 0);
+        }
+        else switch (height % 5) {
+            case (0) -> {
+                this.equatorLeftCorner = new Vector2d(0, (int)(0.4 * height));
+                this.equatorRightCorner = new Vector2d(width - 1, equatorLeftCorner.y() + height/5 - 1);
+            }
+            case (1) -> {
+                this.equatorLeftCorner = new Vector2d(0, (int)(0.4 * (height - 1)));
+                this.equatorRightCorner = new Vector2d(width - 1, equatorLeftCorner.y() + (height - 1)/5 - 1);
+            }
+            case (2) -> {
+                this.equatorLeftCorner = new Vector2d(0, (int)(0.4 * (height - 2) + 1));
+                this.equatorRightCorner = new Vector2d(width - 1, equatorLeftCorner.y() + (height - 2)/5 - 1);
+            }
+            case (3) -> {
+                this.equatorLeftCorner = new Vector2d(0, (int)(0.4 * (height - 3) + 1));
+                this.equatorRightCorner = new Vector2d(width - 1, equatorLeftCorner.y() + (height - 3)/5);
+            }
+            case (4) -> {
+                this.equatorLeftCorner = new Vector2d(0, (int)(0.4 * (height - 4) + 1));
+                this.equatorRightCorner = new Vector2d(width - 1, equatorLeftCorner.y() + (height - 4)/5);
+            }
+        }
         this.startingGrassAmount = startingGrassAmount;
-        int equatorStartingGrasses = (int) Math.ceil(startingGrassAmount * 0.8);
-        int otherStartingGrasses = startingGrassAmount - equatorStartingGrasses;
-
-        StartingGrassGenerator equatorPositionGenerator = new StartingGrassGenerator(equatorLeftCorner.x(),
-                equatorLeftCorner.y(), equatorRightCorner.x(), equatorRightCorner.y(), equatorStartingGrasses);
-        for (Vector2d grassPosition : equatorPositionGenerator) {
-            grassMap.put(grassPosition, new Grass(grassPosition));
-        }
-        int upperOtherGrasses = (int) (Math.random() * otherStartingGrasses);
-        int lowerOtherGrasses = otherStartingGrasses = upperOtherGrasses;
-
-        StartingGrassGenerator upperPositionGenerator = new StartingGrassGenerator(0, equatorRightCorner.y() + 1,
-                width - 1, height - 1, upperOtherGrasses);
-        for (Vector2d grassPosition : upperPositionGenerator) {
-            grassMap.put(grassPosition, new Grass(grassPosition));
-        }
-
-        StartingGrassGenerator lowerPositionGenerator = new StartingGrassGenerator(0, 0, width - 1,
-                equatorLeftCorner.y(), lowerOtherGrasses);
-        for (Vector2d grassPosition : lowerPositionGenerator) {
-            grassMap.put(grassPosition, new Grass(grassPosition));
-        }
-
+//        int equatorStartingGrasses = (int) Math.ceil(startingGrassAmount * 0.8);
+//        int otherStartingGrasses = startingGrassAmount - equatorStartingGrasses;
+//
+//        StartingGrassGenerator equatorPositionGenerator = new StartingGrassGenerator(equatorLeftCorner.x(),
+//                equatorLeftCorner.y(), equatorRightCorner.x(), equatorRightCorner.y(), equatorStartingGrasses);
+//        for (Vector2d grassPosition : equatorPositionGenerator) {
+//            grassMap.put(grassPosition, new Grass(grassPosition));
+//        }
+//        int upperOtherGrasses = (int) (Math.random() * otherStartingGrasses);
+//        int lowerOtherGrasses = otherStartingGrasses = upperOtherGrasses;
+//
+//        StartingGrassGenerator upperPositionGenerator = new StartingGrassGenerator(0, equatorRightCorner.y() + 1,
+//                width - 1, height - 1, upperOtherGrasses);
+//        for (Vector2d grassPosition : upperPositionGenerator) {
+//            grassMap.put(grassPosition, new Grass(grassPosition));
+//        }
+//
+//        StartingGrassGenerator lowerPositionGenerator = new StartingGrassGenerator(0, 0, width - 1,
+//                equatorLeftCorner.y(), lowerOtherGrasses);
+//        for (Vector2d grassPosition : lowerPositionGenerator) {
+//            grassMap.put(grassPosition, new Grass(grassPosition));
+//        }
+        generatingGrass(startingGrassAmount);
     }
 
-    public Map<Vector2d, Grass> getGrassMap() {
-        return grassMap;
+    public Vector2d getEquatorRightCorner() {
+        return equatorRightCorner;
     }
+
+    public Vector2d getEquatorLeftCorner() {
+        return equatorLeftCorner;
+    }
+
 
     public List<Vector2d> preferredGrassPositions() {
         List<Vector2d> betterGrass = new ArrayList<>();
@@ -86,34 +117,31 @@ public class World implements WorldMap {
         return worseGrass;
     }
 
-    public void generatingGrasses(int grassGrowth) {
-        int equatorGrasses = (int) Math.ceil(grassGrowth * 0.8);
+    public void generatingGrass(int grassGrowth) {
+        int equatorGrass = (int) Math.ceil(grassGrowth * 0.8);
         int tempGrassAmount = grassMap.size();
 
         GeneralGrassGenerator equatorPositionGenerator = new GeneralGrassGenerator(equatorLeftCorner.x(),
-                equatorLeftCorner.y(), equatorRightCorner.x(), equatorRightCorner.y(), equatorGrasses, grassMap);
+                equatorLeftCorner.y(), equatorRightCorner.x(), equatorRightCorner.y(), equatorGrass, grassMap);
         for (Vector2d grassPosition : equatorPositionGenerator) {
             grassMap.put(grassPosition, new Grass(grassPosition));
         }
 
-        int placedGrasses = grassMap.size() - tempGrassAmount;
-        int otherGrasses = grassGrowth - placedGrasses;
-//        System.out.println(otherGrasses);
-        int upperOtherGrasses = (int) Math.round(Math.random() * otherGrasses);
-//        System.out.println(upperOtherGrasses);
+        int placedGrass = grassMap.size() - tempGrassAmount;
+        int otherGrass = grassGrowth - placedGrass;
+        int upperOtherGrass = (int) Math.round(Math.random() * otherGrass);
         tempGrassAmount = grassMap.size();
 
         GeneralGrassGenerator upperPositionGenerator = new GeneralGrassGenerator(0, equatorRightCorner.y() + 1,
-                width - 1, height - 1, upperOtherGrasses, grassMap);
+                width - 1, height - 1, upperOtherGrass, grassMap);
         for (Vector2d grassPosition : upperPositionGenerator) {
             grassMap.put(grassPosition, new Grass(grassPosition));
         }
-
-        placedGrasses = grassMap.size() - tempGrassAmount;
-        int lowerOtherGrasses = otherGrasses - placedGrasses;
+        placedGrass = grassMap.size() - tempGrassAmount;
+        int lowerOtherGrasses = otherGrass - placedGrass;
 
         GeneralGrassGenerator lowerPositionGenerator = new GeneralGrassGenerator(0, 0, width - 1,
-                equatorLeftCorner.y(), lowerOtherGrasses, grassMap);
+                equatorLeftCorner.y() - 1, lowerOtherGrasses, grassMap);
         for (Vector2d grassPosition : lowerPositionGenerator) {
             grassMap.put(grassPosition, new Grass(grassPosition));
         }

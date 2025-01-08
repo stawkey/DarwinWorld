@@ -97,7 +97,7 @@ public class Simulation implements Runnable {
 
             // Generating new grass
 //        System.out.println("Before: " + world.getGrassMap());
-            world.generatingGrasses(grassGrowth);
+            world.generatingGrass(grassGrowth);
 //        System.out.println("After: " + world.getGrassMap());
             try {
                 Thread.sleep(2000);
