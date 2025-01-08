@@ -16,6 +16,6 @@ public class Main {
         simulations.add(simulation2);
 
         SimulationEngine engine = new SimulationEngine(simulations);
-        engine.runAsyncInThreadPool();
+        engine.runAsync();
     }
 }
