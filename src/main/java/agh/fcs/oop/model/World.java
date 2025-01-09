@@ -8,27 +8,25 @@ import java.util.List;
 import java.util.Map;
 
 public class World implements WorldMap {
-    private final int width;
-    private final int height;
-    private final Vector2d bottomLeft;
-    private final Vector2d upperRight;
-    private Vector2d equatorLeftCorner;
-    private Vector2d equatorRightCorner;
-    private final int startingGrassAmount;
-    private Map<Vector2d, Animal> animalMap = new HashMap<>();
-    private Map<Vector2d, Grass> grassMap = new HashMap<>();
-    private Map<Vector2d, WorldElement> allElements = new HashMap<>();
-    private MapVisualizer visualizer = new MapVisualizer(this);
-    private int mapID = this.hashCode();
-    private List<MapChangeListener> observers = new ArrayList<>();
+    protected final int width;
+    protected final int height;
+    protected final Vector2d bottomLeft;
+    protected final Vector2d upperRight;
+    protected Vector2d equatorLeftCorner;
+    protected Vector2d equatorRightCorner;
+    protected final int startingGrassAmount;
+    protected Map<Vector2d, Animal> animalMap = new HashMap<>();
+    protected Map<Vector2d, Grass> grassMap = new HashMap<>();
+    protected Map<Vector2d, WorldElement> allElements = new HashMap<>();
+    protected MapVisualizer visualizer = new MapVisualizer(this);
+    protected int mapID = this.hashCode();
+    protected List<MapChangeListener> observers = new ArrayList<>();
 
     public World(int width, int height, int startingGrassAmount) {
         this.width = width;
         this.height = height;
         this.bottomLeft = new Vector2d(0, 0);
         this.upperRight = new Vector2d(width - 1, height - 1);
-//        double equatorHeight = Math.ceil(height * 1.0 /5);
-//        TODO: some bugfixing with equators
         this.equatorLeftCorner = null;
         this.equatorRightCorner = null;
         if (height == 1 || height == 2) {

@@ -43,6 +43,19 @@ public enum MapDirection {
         };
     }
 
+    public MapDirection oppositeDirection() {
+        return switch (this) {
+            case NORTH -> SOUTH;
+            case NORTHEAST -> SOUTHWEST;
+            case EAST -> WEST;
+            case SOUTHEAST -> NORTHWEST;
+            case SOUTH -> NORTH;
+            case SOUTHWEST -> NORTHEAST;
+            case WEST -> EAST;
+            case NORTHWEST -> SOUTHEAST;
+        };
+    }
+
     public static MapDirection randomDirection()  {
         MapDirection[] directions = values();
         return directions[ThreadLocalRandom.current().nextInt(directions.length)];
