@@ -46,7 +46,6 @@ public class StartingGrassGenerator implements Iterator<Vector2d>, Iterable<Vect
     @Override
     public Vector2d next() {
         if (hasNext()) {
-//            System.out.println(possiblePlaces.size());
             int chosenPlace = random.nextInt(possiblePlaces.size());
             Vector2d generatedVector = possiblePlaces.get(chosenPlace);
             possiblePlaces.remove(chosenPlace);
