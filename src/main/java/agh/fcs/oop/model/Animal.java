@@ -75,7 +75,13 @@ public class Animal implements WorldElement {
     // then moves forwards by 1 unit vector
     public void move(WorldMap world) {
         int direction = gene.get(currGene);
-        currGene++;
+
+        if(ThreadLocalRandom.current().nextInt(5) % 5 == 0) {
+            currGene += ThreadLocalRandom.current().nextInt(animalConfig.getGeneLength() - 1);
+        }
+        else {
+            currGene++;
+        }
         currGene = currGene % gene.size();
 
         facingDirection = facingDirection.rotateBy(direction);

@@ -102,12 +102,16 @@ public class Simulation implements Runnable {
 //        System.out.println("After: " + world.getGrassMap());
 
             try {
-                Thread.sleep(2000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 System.err.println("Simulation interrupted: " + e.getMessage());
                 Thread.currentThread().interrupt();
-                break; // Break loop if interrupted
+                break;
             }
         }
+    }
+
+    public ArrayList<Animal> getAnimalList() {
+        return animalList;
     }
 }
