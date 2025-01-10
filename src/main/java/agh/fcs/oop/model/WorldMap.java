@@ -1,10 +1,6 @@
 package agh.fcs.oop.model;
 
-import agh.fcs.oop.model.Vector2d;
-
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * The interface responsible for interacting with the map of the world.

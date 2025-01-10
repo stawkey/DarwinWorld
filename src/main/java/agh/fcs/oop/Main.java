@@ -5,8 +5,6 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-//        Simulation simulation = new Simulation(5, 5, 5, 5, 10, 5, 5, 1, 5, 3, 5, 8);
-//        simulation.run();
 
         List<Simulation> simulations = new ArrayList<>();
 

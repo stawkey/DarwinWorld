@@ -38,8 +38,13 @@ public class Animal implements WorldElement {
         currGene = ThreadLocalRandom.current().nextInt(animalConfig.getGeneLength());
     }
 
+
     public Vector2d getPosition() {
         return position;
+    }
+
+    public void setPosition(Vector2d position) {
+        this.position = position;
     }
 
     public int getEnergy() {
@@ -54,6 +59,10 @@ public class Animal implements WorldElement {
         return age;
     }
 
+    public void setAge(int age) {
+        this.age = age;
+    }
+
     public int getChildrenNumber() {
         return childrenNumber;
     }
@@ -64,6 +73,10 @@ public class Animal implements WorldElement {
 
     public MapDirection getFacingDirection() {
         return facingDirection;
+    }
+
+    public void setFacingDirection(MapDirection facingDirection) {
+        this.facingDirection = facingDirection;
     }
 
     public int getCurrGene() {
