@@ -61,6 +61,16 @@ public class Simulation implements Runnable {
             // Animals movement
             for (Animal animal : animalList) {
                 world.move(animal);
+                if (world instanceof WorldPoles) {
+                    if (animal.getPosition().x() >= world.getWidth() - 1 - ((WorldPoles) world).getPoleFields() / 2
+                            || animal.getPosition().x() <= ((WorldPoles) world).getPoleFields() / 2) {
+                        animal.setEnergy(animal.getEnergy() - 2);
+                    }
+                    else if (animal.getPosition().x() >= world.getWidth() - 1 - ((WorldPoles) world).getPoleFields()
+                        || animal.getPosition().x() <= ((WorldPoles) world).getPoleFields()) {
+                        animal.setEnergy(animal.getEnergy() - 1);
+                    }
+                }
             }
 
             // Eating

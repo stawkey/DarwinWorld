@@ -81,6 +81,9 @@ public class World implements WorldMap {
         generatingGrass(startingGrassAmount);
     }
 
+    public int getWidth() {
+        return width;
+    }
 
     public List<Vector2d> preferredGrassPositions() {
         List<Vector2d> betterGrass = new ArrayList<>();
