@@ -15,6 +15,7 @@ public class Simulation implements Runnable {
     private final int grassEnergy;
     private final int grassGrowth;
     private final int minEnergyForReproduction;
+    private List<MapChangeListener> listeners = new ArrayList<>();
 
     public Simulation(int width, int height, int startGrassCount, int startAnimalCount, int startAnimalEnergy,
                       int minReproductionEnergy, int energyUsedForReproduction, int minMutationCount,
@@ -45,6 +46,26 @@ public class Simulation implements Runnable {
         this.minEnergyForReproduction = minReproductionEnergy;
     }
 
+    public World getWorld() {
+        return world;
+    }
+
+    public void addListener(MapChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    private void notifyListeners(String message) {
+        for (MapChangeListener listener : listeners) {
+            listener.mapChanged(world, message);
+        }
+    }
+
+    private void notifySimulationStep(String message) {
+        for (MapChangeListener listener : listeners) {
+            listener.mapChanged(world, message);
+        }
+    }
+
     @Override
     public void run() {
         while (!animalList.isEmpty()) {
@@ -57,6 +78,8 @@ public class Simulation implements Runnable {
                 world.removeAnimal(animal);
                 animalList.remove(animal);
             });
+
+            notifySimulationStep("");
 
             // Animals movement
             for (Animal animal : animalList) {
@@ -73,6 +96,8 @@ public class Simulation implements Runnable {
                 }
             }
 
+            notifySimulationStep("");
+
             // Eating
             Map<Vector2d, WorldElement> allElements = world.getElements();
             for (Animal animal : animalList) {
@@ -82,6 +107,7 @@ public class Simulation implements Runnable {
                     world.removeGrass(position);
                 }
             }
+            notifySimulationStep("");
 
             // Reproduction
             Map<Vector2d, List<Animal>> animalsGroupedByPosition = animalList.stream()
@@ -106,11 +132,13 @@ public class Simulation implements Runnable {
                         }
                     });
 
-            // Generating new grass
-//        System.out.println("Before: " + world.getGrassMap());
-            world.generatingGrass(grassGrowth);
-//        System.out.println("After: " + world.getGrassMap());
+            notifySimulationStep("");
 
+            // Generating new grass
+            world.generatingGrass(grassGrowth);
+
+
+            notifySimulationStep("");
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {

@@ -85,6 +85,10 @@ public class World implements WorldMap {
         return width;
     }
 
+    public int getHeight() {
+        return height;
+    }
+
     public List<Vector2d> preferredGrassPositions() {
         List<Vector2d> betterGrass = new ArrayList<>();
         for (int i = equatorLeftCorner.x(); i <= equatorRightCorner.x(); i++) {
@@ -179,7 +183,7 @@ public class World implements WorldMap {
     }
 
     public boolean isOccupied(Vector2d position) {
-        return animalMap.containsKey(position);
+        return animalMap.containsKey(position) || grassMap.containsKey(position);
     }
 
 
