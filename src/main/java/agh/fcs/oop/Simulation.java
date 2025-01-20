@@ -16,6 +16,113 @@ public class Simulation implements Runnable {
     private final int grassGrowth;
     private final int minEnergyForReproduction;
     private List<MapChangeListener> listeners = new ArrayList<>();
+    private volatile boolean paused = false;
+
+    @Override
+    public void run() {
+        while (!animalList.isEmpty()) {
+            synchronized (this) {
+                while (paused) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
+            }
+
+            try {
+                List<Animal> toRemove = animalList.stream()
+                        .filter(animal -> !animal.isAlive())
+                        .toList();
+
+                toRemove.forEach(animal -> {
+                    world.removeAnimal(animal);
+                    animalList.remove(animal);
+                });
+
+                notifySimulationStep("");
+
+                for (Animal animal : animalList) {
+                    world.move(animal);
+                    if (world instanceof WorldPoles) {
+                        if (animal.getPosition().x() >= world.getWidth() - 1 - ((WorldPoles) world).getPoleFields() / 2
+                                || animal.getPosition().x() <= ((WorldPoles) world).getPoleFields() / 2) {
+                            animal.setEnergy(animal.getEnergy() - 2);
+                        } else if (animal.getPosition().x() >= world.getWidth() - 1 - ((WorldPoles) world).getPoleFields()
+                                || animal.getPosition().x() <= ((WorldPoles) world).getPoleFields()) {
+                            animal.setEnergy(animal.getEnergy() - 1);
+                        }
+                    }
+                }
+
+                notifySimulationStep("");
+
+                Map<Vector2d, WorldElement> allElements = world.getElements();
+                for (Animal animal : animalList) {
+                    Vector2d position = animal.getPosition();
+                    if (allElements.get(position) instanceof Grass) {
+                        animal.setEnergy(animal.getEnergy() + grassEnergy);
+                        world.removeGrass(position);
+                    }
+                }
+
+                notifySimulationStep("");
+
+                Map<Vector2d, List<Animal>> animalsGroupedByPosition = animalList.stream()
+                        .filter(a -> a.getEnergy() > minEnergyForReproduction)
+                        .collect(Collectors.groupingBy(Animal::getPosition));
+
+                animalsGroupedByPosition.values().stream()
+                        .map(a -> a.stream()
+                                .sorted(Comparator.comparingInt(Animal::getEnergy).reversed()
+                                        .thenComparingInt(Animal::getAge).reversed()
+                                        .thenComparingInt(Animal::getChildrenNumber).reversed())
+                                .limit(2)
+                                .toList())
+                        .filter(pair -> pair.size() == 2)
+                        .forEach(pair -> {
+                            Animal offspring = pair.get(0).reproduce(pair.get(1));
+                            animalList.add(offspring);
+                            try {
+                                world.place(offspring);
+                            } catch (IncorrectPositionException e) {
+                                System.out.println("Incorrect position: " + offspring.getPosition());
+                            }
+                        });
+
+                notifySimulationStep("");
+
+                world.generatingGrass(grassGrowth);
+
+                notifySimulationStep("");
+
+                Thread.sleep(500);
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+    }
+
+    public synchronized void pause() {
+        paused = true;
+    }
+
+    public synchronized void resume() {
+        paused = false;
+        notify();
+    }
+
+    public boolean isPaused () {
+       return paused;
+    }
+
+    public ArrayList<Animal> getAnimalList() {
+        return animalList;
+    }
 
     public Simulation(int width, int height, int startGrassCount, int startAnimalCount, int startAnimalEnergy,
                       int minReproductionEnergy, int energyUsedForReproduction, int minMutationCount,
@@ -64,92 +171,5 @@ public class Simulation implements Runnable {
         for (MapChangeListener listener : listeners) {
             listener.mapChanged(world, message);
         }
-    }
-
-    @Override
-    public void run() {
-        while (!animalList.isEmpty()) {
-            // Remove dead animals
-            List<Animal> toRemove = animalList.stream()
-                    .filter(animal -> !animal.isAlive())
-                    .toList();
-
-            toRemove.forEach(animal -> {
-                world.removeAnimal(animal);
-                animalList.remove(animal);
-            });
-
-            notifySimulationStep("");
-
-            // Animals movement
-            for (Animal animal : animalList) {
-                world.move(animal);
-                if (world instanceof WorldPoles) {
-                    if (animal.getPosition().x() >= world.getWidth() - 1 - ((WorldPoles) world).getPoleFields() / 2
-                            || animal.getPosition().x() <= ((WorldPoles) world).getPoleFields() / 2) {
-                        animal.setEnergy(animal.getEnergy() - 2);
-                    }
-                    else if (animal.getPosition().x() >= world.getWidth() - 1 - ((WorldPoles) world).getPoleFields()
-                        || animal.getPosition().x() <= ((WorldPoles) world).getPoleFields()) {
-                        animal.setEnergy(animal.getEnergy() - 1);
-                    }
-                }
-            }
-
-            notifySimulationStep("");
-
-            // Eating
-            Map<Vector2d, WorldElement> allElements = world.getElements();
-            for (Animal animal : animalList) {
-                Vector2d position = animal.getPosition();
-                if (allElements.get(position) instanceof Grass) {
-                    animal.setEnergy(animal.getEnergy() + grassEnergy);
-                    world.removeGrass(position);
-                }
-            }
-            notifySimulationStep("");
-
-            // Reproduction
-            Map<Vector2d, List<Animal>> animalsGroupedByPosition = animalList.stream()
-                    .filter(a -> a.getEnergy() > minEnergyForReproduction)
-                    .collect(Collectors.groupingBy(Animal::getPosition));
-
-            animalsGroupedByPosition.values().stream()
-                    .map(a -> a.stream()
-                            .sorted(Comparator.comparingInt(Animal::getEnergy).reversed()
-                                    .thenComparingInt(Animal::getAge).reversed()
-                                    .thenComparingInt(Animal::getChildrenNumber).reversed())
-                            .limit(2)
-                            .toList())
-                    .filter(pair -> pair.size() == 2)
-                    .forEach(pair -> {
-                        Animal offspring = pair.get(0).reproduce(pair.get(1));
-                        animalList.add(offspring);
-                        try {
-                            world.place(offspring);
-                        } catch (IncorrectPositionException e) {
-                            System.out.println("Incorrect position: " + offspring.getPosition());
-                        }
-                    });
-
-            notifySimulationStep("");
-
-            // Generating new grass
-            world.generatingGrass(grassGrowth);
-
-
-            notifySimulationStep("");
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                System.err.println("Simulation interrupted: " + e.getMessage());
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-    }
-
-    public ArrayList<Animal> getAnimalList() {
-        return animalList;
     }
 }

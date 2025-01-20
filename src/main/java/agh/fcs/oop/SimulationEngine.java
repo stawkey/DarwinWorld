@@ -1,6 +1,7 @@
 package agh.fcs.oop;
 
 import agh.fcs.oop.model.MapChangeListener;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -9,8 +10,10 @@ import java.util.concurrent.TimeUnit;
 
 public class SimulationEngine {
     private final List<Simulation> simulations;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(4);
+    private final List<Thread> threads = new ArrayList<>();
+    ExecutorService executorService = Executors.newFixedThreadPool(4);
     private final List<MapChangeListener> listeners = new ArrayList<>();
+
     public SimulationEngine(List<Simulation> simulations) {
         this.simulations = simulations;
     }
@@ -27,6 +30,7 @@ public class SimulationEngine {
 
     public void runSync() {
         for (Simulation simulation : simulations) {
+            simulation.addListener((world, message) -> notifyListeners(simulation, message));
             simulation.run();
             notifyListeners(simulation, "Simulation step executed synchronously");
         }
@@ -35,24 +39,35 @@ public class SimulationEngine {
     public void runAsync() {
         for (Simulation simulation : simulations) {
             simulation.addListener((world, message) -> notifyListeners(simulation, message));
-            executorService.submit(() -> {
-                simulation.run();
-                notifyListeners(simulation, "Simulation step executed asynchronously");
-            });
+            Thread thread = new Thread(simulation);
+            threads.add(thread);
+            thread.start();
+            notifyListeners(simulation, "Simulation step executed asynchronously");
+        }
+        awaitSimulationsEnd();
+    }
+
+    public void runAsyncInThreadPool() {
+        for (Simulation simulation : simulations) {
+            simulation.addListener((world, message) -> notifyListeners(simulation, message));
+            executorService.submit(simulation);
+            notifyListeners(simulation, "Simulation step executed asynchronously");
         }
         awaitSimulationsEnd();
     }
 
     public void awaitSimulationsEnd() {
-        executorService.shutdown();
         try {
+            for (Thread thread : threads) {
+                thread.join();
+            }
+            executorService.shutdown();
             if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
                 executorService.shutdownNow();
             }
-        } catch (InterruptedException e) {
-            System.err.println("Execution interrupted: " + e.getMessage());
-            executorService.shutdownNow();
-            Thread.currentThread().interrupt();
+        }
+        catch (InterruptedException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -1,0 +1,10 @@
+HBox {
+    -fx-alignment: center;
+    -fx-spacing: 20;
+}
+
+
+.button {
+    -fx-pref-height: 30;
+    -fx-pref-width: 80;
+}

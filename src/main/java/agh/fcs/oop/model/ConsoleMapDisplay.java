@@ -7,9 +7,9 @@ public class ConsoleMapDisplay implements MapChangeListener {
     public void mapChanged(World world, String message) {
         synchronized (this.getClass()) {
             numberOfChanges++;
-            System.out.println(world.getID());
-            System.out.println("Change #" + numberOfChanges + ": " + message);
-            System.out.println(world);
+//            System.out.println(world.getID());
+//            System.out.println("Change #" + numberOfChanges + ": " + message);
+//            System.out.println(world);
         }
     }
 }

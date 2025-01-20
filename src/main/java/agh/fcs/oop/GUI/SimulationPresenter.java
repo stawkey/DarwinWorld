@@ -4,18 +4,23 @@ import agh.fcs.oop.Simulation;
 import agh.fcs.oop.SimulationEngine;
 import agh.fcs.oop.model.*;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.List;
 
 
 public class SimulationPresenter implements MapChangeListener {
+    public Button toggleSimulationButton;
     private Simulation simulation;
     private World world;
     @FXML
@@ -60,19 +65,6 @@ public class SimulationPresenter implements MapChangeListener {
             drawMap();
             descriptionLabel.setText(message);
         });
-    }
-
-    @FXML
-    private void onSimulationStartClicked(){
-        String moveList = listOfMoves.getText();
-        Simulation simulation = new Simulation(20, 10, 10, 5, 10, 5, 5, 1, 5, 3, 5, 8);
-        this.world = simulation.getWorld();
-        SimulationEngine engine = new SimulationEngine(List.of(simulation));
-        engine.addListener(this);
-        descriptionLabel.setText("Simulation started with moves: " + moveList);
-        new Thread(() -> {
-            engine.runAsync();
-        }).start();
     }
 
     private void clearGrid(){
@@ -135,5 +127,35 @@ public class SimulationPresenter implements MapChangeListener {
         }
     }
 
+    public void toggleSimulation(ActionEvent actionEvent) {
+        if(simulation == null) {
+            String moveList = listOfMoves.getText();
+            simulation = new Simulation(20, 10, 10, 10, 10, 5, 5, 1, 5, 3, 5, 8);
+            this.world = simulation.getWorld();
+            SimulationEngine engine = new SimulationEngine(List.of(simulation));
+            engine.addListener(this);
+            descriptionLabel.setText("Simulation started with moves: " + moveList);
+            toggleSimulationButton.setText("Pause");
+            new Thread(engine::runSync).start();
+        }
+        else if(simulation.isPaused()) {
+            simulation.resume();
+            toggleSimulationButton.setText("Pause");
+        }
+        else {
+            simulation.pause();
+            toggleSimulationButton.setText("Resume");
+        }
+    }
 
+    @FXML
+    private void newGame(){
+        SimulationApp simulationApp = new SimulationApp();
+
+        try {
+            simulationApp.start(new Stage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
