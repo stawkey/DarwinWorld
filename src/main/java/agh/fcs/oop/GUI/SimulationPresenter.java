@@ -9,10 +9,10 @@ import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -20,17 +20,29 @@ import java.util.List;
 
 
 public class SimulationPresenter implements MapChangeListener {
+    @FXML
     public Button toggleSimulationButton;
-    private Simulation simulation;
-    private World world;
     @FXML
-    private Label infoLabel;
+    public Text animalsCount;
     @FXML
-    private TextField listOfMoves;
+    public Text grassCount;
+    @FXML
+    public Text emptyFields;
+    @FXML
+    public Text mostPopularGene;
+    @FXML
+    public Text averageEnergy;
+    @FXML
+    public Text averageLifespan;
+    @FXML
+    public Text averageChildren;
     @FXML
     private Label descriptionLabel;
     @FXML
     private GridPane mapGrid;
+
+    private Simulation simulation;
+    private World world;
     private int width = 100;
     private int height = 100;
     private int maxWidth = 700;
@@ -42,6 +54,55 @@ public class SimulationPresenter implements MapChangeListener {
     private int yMax;
     private int mapWidth;
     private int mapHeight;
+
+    public void toggleSimulation(ActionEvent actionEvent) {
+        if(simulation == null) {
+//            simulation = new Simulation(20, 10, 10, 10, 10, 5, 5, 1, 5, 3, 5, 8);
+            simulation = new Simulation(5, 5, 5, 5, 5, 4, 3, 1, 5, 2, 3, 8);
+            this.world = simulation.getWorld();
+            SimulationEngine engine = new SimulationEngine(List.of(simulation));
+            engine.addListener(this);
+            toggleSimulationButton.setText("Pause");
+            new Thread(engine::runSync).start();
+        }
+        else if(simulation.isPaused()) {
+            simulation.resume();
+            toggleSimulationButton.setText("Pause");
+        }
+        else {
+            simulation.pause();
+            toggleSimulationButton.setText("Resume");
+        }
+    }
+
+    @FXML
+    private void newGame(){
+        SimulationApp simulationApp = new SimulationApp();
+
+        try {
+            simulationApp.start(new Stage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void mapChanged(World world, String message) {
+        this.world = world;
+        Platform.runLater(() -> {
+            clearGrid();
+            drawMap();
+            descriptionLabel.setText(message);
+
+            // Statistics
+            animalsCount.setText("Animals alive: " + world.animalCount());
+            grassCount.setText("Grasses: " + world.grassCount());
+            emptyFields.setText("Empty fields: " + (mapHeight*mapWidth - world.takenFields()));
+            mostPopularGene.setText("Most popular gene: " + simulation.getMostPopularGene());
+            averageEnergy.setText("Average animal energy: " + simulation.getAverageEnergy());
+            averageLifespan.setText("Average lifespan: " + simulation.getAverageLifeSpan());
+            averageChildren.setText("Average children count: " + simulation.getAverageChildrenCount());
+        });
+    }
 
     public void setSimulation(Simulation simulation) {
         this.simulation = simulation;
@@ -56,15 +117,6 @@ public class SimulationPresenter implements MapChangeListener {
         rowsFunction();
         addElements();
         mapGrid.setGridLinesVisible(true);
-    }
-
-    public void mapChanged(World world, String message) {
-        this.world = world;
-        Platform.runLater(() -> {
-            clearGrid();
-            drawMap();
-            descriptionLabel.setText(message);
-        });
     }
 
     private void clearGrid(){
@@ -124,38 +176,6 @@ public class SimulationPresenter implements MapChangeListener {
                 }
                 mapGrid.setHalignment(mapGrid.getChildren().get(mapGrid.getChildren().size() - 1), HPos.CENTER);
             }
-        }
-    }
-
-    public void toggleSimulation(ActionEvent actionEvent) {
-        if(simulation == null) {
-            String moveList = listOfMoves.getText();
-            simulation = new Simulation(20, 10, 10, 10, 10, 5, 5, 1, 5, 3, 5, 8);
-            this.world = simulation.getWorld();
-            SimulationEngine engine = new SimulationEngine(List.of(simulation));
-            engine.addListener(this);
-            descriptionLabel.setText("Simulation started with moves: " + moveList);
-            toggleSimulationButton.setText("Pause");
-            new Thread(engine::runSync).start();
-        }
-        else if(simulation.isPaused()) {
-            simulation.resume();
-            toggleSimulationButton.setText("Pause");
-        }
-        else {
-            simulation.pause();
-            toggleSimulationButton.setText("Resume");
-        }
-    }
-
-    @FXML
-    private void newGame(){
-        SimulationApp simulationApp = new SimulationApp();
-
-        try {
-            simulationApp.start(new Stage());
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

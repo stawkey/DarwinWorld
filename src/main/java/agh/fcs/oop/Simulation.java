@@ -2,10 +2,7 @@ package agh.fcs.oop;
 
 import agh.fcs.oop.model.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -17,6 +14,8 @@ public class Simulation implements Runnable {
     private final int minEnergyForReproduction;
     private List<MapChangeListener> listeners = new ArrayList<>();
     private volatile boolean paused = false;
+    private final ArrayList<Animal> deadAnimals = new ArrayList<>();
+    private int totalDeadAnimalsAge = 0;
 
     @Override
     public void run() {
@@ -27,7 +26,6 @@ public class Simulation implements Runnable {
                         wait();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        return;
                     }
                 }
             }
@@ -40,6 +38,8 @@ public class Simulation implements Runnable {
                 toRemove.forEach(animal -> {
                     world.removeAnimal(animal);
                     animalList.remove(animal);
+                    deadAnimals.add(animal);
+                    totalDeadAnimalsAge += animal.getAge();
                 });
 
                 notifySimulationStep("");
@@ -98,11 +98,10 @@ public class Simulation implements Runnable {
 
                 notifySimulationStep("");
 
-                Thread.sleep(500);
+                Thread.sleep(50);
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                return;
             }
         }
     }
@@ -153,10 +152,6 @@ public class Simulation implements Runnable {
         this.minEnergyForReproduction = minReproductionEnergy;
     }
 
-    public World getWorld() {
-        return world;
-    }
-
     public void addListener(MapChangeListener listener) {
         listeners.add(listener);
     }
@@ -172,4 +167,49 @@ public class Simulation implements Runnable {
             listener.mapChanged(world, message);
         }
     }
+
+    public World getWorld() {
+        return world;
+    }
+
+    public List<Integer> getMostPopularGene() {
+        Map<List<Integer>, Integer> geneFrequency = new HashMap<>();
+
+        for (Animal animal : animalList) {
+            List<Integer> gene = Collections.unmodifiableList(animal.getGene());
+            geneFrequency.put(gene, geneFrequency.getOrDefault(gene, 0) + 1);
+        }
+
+        return geneFrequency.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .orElseThrow(() -> new IllegalStateException("No genes found"))
+                .getKey();
+    }
+
+
+    public double getAverageEnergy() {
+        if (animalList.isEmpty()) {
+            return 0;
+        }
+        int totalEnergy = animalList.stream().mapToInt(Animal::getEnergy).sum();
+        return Math.round((double) totalEnergy / animalList.size() * 100.0) / 100.0;
+    }
+
+
+    public double getAverageLifeSpan() {
+        if (deadAnimals.isEmpty()) {
+            return 0;
+        }
+        return Math.round((double) totalDeadAnimalsAge / deadAnimals.size() * 100.0) / 100.0;
+    }
+
+    public double getAverageChildrenCount() {
+        if (animalList.isEmpty()) {
+            return 0;
+        }
+        int totalChildren = animalList.stream().mapToInt(Animal::getChildrenNumber).sum();
+        return Math.round((double) totalChildren / animalList.size() * 100.0) / 100.0;
+    }
+
 }

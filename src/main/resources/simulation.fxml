@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             minHeight="550.0" minWidth="850.0"
@@ -14,12 +15,22 @@
             fx:controller="agh.fcs.oop.GUI.SimulationPresenter">
     <top>
         <VBox spacing="10" xmlns="http://javafx.com/javafx">
-            <TextField fx:id="listOfMoves" promptText="Enter moves" />
             <Label fx:id="descriptionLabel" />
         </VBox>
     </top>
+    <left>
+        <VBox spacing="10" xmlns="http://javafx.com/javafx">
+            <Text fx:id="animalsCount" />
+            <Text fx:id="grassCount" />
+            <Text fx:id="emptyFields" />
+            <Text fx:id="mostPopularGene" />
+            <Text fx:id="averageEnergy" />
+            <Text fx:id="averageLifespan" />
+            <Text fx:id="averageChildren" />
+        </VBox>
+    </left>
     <center>
-        <GridPane fx:id="mapGrid" gridLinesVisible="true" alignment="CENTER"/>
+        <GridPane fx:id="mapGrid" gridLinesVisible="true" alignment="CENTER" />
     </center>
     <bottom>
         <HBox xmlns="http://javafx.com/javafx" >

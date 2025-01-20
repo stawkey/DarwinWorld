@@ -2,10 +2,7 @@ package agh.fcs.oop.model;
 
 import agh.fcs.oop.model.util.MapVisualizer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class World implements WorldMap {
     protected final int width;
@@ -217,4 +214,18 @@ public class World implements WorldMap {
         return visualizer.draw(bottomLeft, upperRight);
     }
 
+    public int animalCount() {
+        return animalMap.size();
+    }
+
+    public int grassCount() {
+        return grassMap.size();
+    }
+
+    public int takenFields() {
+        Set<Vector2d> uniqueKeys = new HashSet<>();
+        uniqueKeys.addAll(animalMap.keySet());
+        uniqueKeys.addAll(grassMap.keySet());
+        return uniqueKeys.size();
+    }
 }
