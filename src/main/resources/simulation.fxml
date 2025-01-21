@@ -34,8 +34,7 @@
     </center>
     <bottom>
         <HBox xmlns="http://javafx.com/javafx" >
-            <Button fx:id="toggleSimulationButton" text="Start" onAction="#toggleSimulation"/>
-            <Button text="New Game" onAction="#newGame" />
+            <Button fx:id="toggleSimulationButton" text="Pause" onAction="#toggleSimulation"/>
         </HBox>
     </bottom>
 </BorderPane>

@@ -61,59 +61,34 @@ public class SimulationPresenter implements MapChangeListener {
         this.simulationConfig = config;
     }
 
+    public void initialize() {
+        Platform.runLater(this::initializeSimulation);
+    }
 
-    public void toggleSimulation(ActionEvent actionEvent) {
-        if(simulation == null) {
-            // if you want to work on version without setup, comment the simulation with
-            // simulationConfig, surface variable and elif with surface variable
-            // if you want to make map bigger or smaller, use maxWidth and maxHeight above
-//            simulation = new Simulation(20, 20, 20, 50, 10, 5, 5, 1, 5, 3, 50, 8);
-            simulation = new Simulation(simulationConfig.getWidth(), simulationConfig.getHeight(), simulationConfig.getGrassCount(),
+    private void initializeSimulation() {
+        if (simulation == null) {
+            simulation = new Simulation(
+                    simulationConfig.getWidth(), simulationConfig.getHeight(), simulationConfig.getGrassCount(),
                     simulationConfig.getAnimalCount(), simulationConfig.getAnimalEnergy(),
                     simulationConfig.getReproductionMinEnergy(), simulationConfig.getReproductionUsedEnergy(),
                     simulationConfig.getMinMutationCount(), simulationConfig.getMaxMutationCount(),
-                    simulationConfig.getGrassEnergy(), simulationConfig.getGrassGrowth(), simulationConfig.getGeneLength());
+                    simulationConfig.getGrassEnergy(), simulationConfig.getGrassGrowth(), simulationConfig.getGeneLength()
+            );
             this.world = simulation.getWorld();
             SimulationEngine engine = new SimulationEngine(List.of(simulation));
             engine.addListener(this);
-            int surface = simulationConfig.getWidth() * simulationConfig.getHeight();
-            if (surface >= 900) {
-                maxWidth = 1000;
-                maxHeight = 1000;
-            }
-            else if (surface >= 625) {
-                maxWidth = 800;
-                maxHeight = 800;
-            }
-            else if (surface >= 400) {
-                maxWidth = 600;
-                maxHeight = 600;
-            }
-            else if (surface >= 225) {
-                maxWidth = 400;
-                maxHeight = 400;
-            }
-            toggleSimulationButton.setText("Pause");
+
             new Thread(engine::runSync).start();
-        }
-        else if(simulation.isPaused()) {
-            simulation.resume();
-            toggleSimulationButton.setText("Pause");
-        }
-        else {
-            simulation.pause();
-            toggleSimulationButton.setText("Resume");
         }
     }
 
-    @FXML
-    private void newGame(){
-        SimulationApp simulationApp = new SimulationApp();
-
-        try {
-            simulationApp.start(new Stage());
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void toggleSimulation(ActionEvent actionEvent) {
+        if (simulation.isPaused()) {
+            simulation.resume();
+            toggleSimulationButton.setText("Pause");
+        } else {
+            simulation.pause();
+            toggleSimulationButton.setText("Resume");
         }
     }
 
