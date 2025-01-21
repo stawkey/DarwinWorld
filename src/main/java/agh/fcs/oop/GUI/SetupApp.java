@@ -1,7 +1,5 @@
 package agh.fcs.oop.GUI;
 
-import agh.fcs.oop.Simulation;
-import agh.fcs.oop.GUI.SimulationPresenter;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -10,12 +8,11 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-
-public class SimulationApp extends Application {
+public class SetupApp extends Application {
 
     public void start(Stage primaryStage) throws IOException {
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getClassLoader().getResource("simulation.fxml"));
+        loader.setLocation(getClass().getClassLoader().getResource("setup.fxml"));
         BorderPane viewRoot = loader.load();
 //        SimulationSetup presenter = loader.getController();
 
@@ -26,9 +23,9 @@ public class SimulationApp extends Application {
     private void configureStage(Stage primaryStage, BorderPane viewRoot) {
         var scene = new Scene(viewRoot);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Simulation app");
-        primaryStage.minWidthProperty().bind(viewRoot.minWidthProperty());
-        primaryStage.minHeightProperty().bind(viewRoot.minHeightProperty());
+        primaryStage.setTitle("Setup window");
+//        primaryStage.minWidthProperty().bind(viewRoot.minWidthProperty());
+//        primaryStage.minHeightProperty().bind(viewRoot.minHeightProperty());
 //        primaryStage.show();
     }
 

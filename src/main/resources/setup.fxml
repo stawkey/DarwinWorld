@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.ImageView?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="agh.fcs.oop.GUI.SimulationSetup"
+            stylesheets="setup.css"
+            minHeight="600.0" minWidth="800.0">
+    <left>
+        <VBox spacing="10" BorderPane.alignment="CENTER">
+            <Text fx:id="worldChoosing" styleClass="text" />
+            <RadioButton fx:id="noVariant" text="No variant" styleClass="radio-button" />
+            <RadioButton fx:id="globe" text="Globe" styleClass="radio-button" />
+            <RadioButton fx:id="poles" text="Poles" styleClass="radio-button" />
+            <Text fx:id="animalChoosing" styleClass="text" />
+            <RadioButton fx:id="random" text="Random gene" styleClass="radio-button" />
+            <RadioButton fx:id="craziness" text="Crazy animals" styleClass="radio-button" />
+        </VBox>
+    </left>
+    <right>
+        <VBox spacing="10" alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
+            <Text fx:id="parameters" text="Simulation Parameters" styleClass="text" />
+            <VBox spacing="5">
+                <HBox spacing="10">
+                    <Text fx:id="textWidth" text="Width:" styleClass="text" />
+                    <TextField fx:id="width" promptText="Set width" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textHeight" text="Height:" styleClass="text" />
+                    <TextField fx:id="height" promptText="Set height" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textGrassCount" text="Grass Count:" styleClass="text" />
+                    <TextField fx:id="grassCount" promptText="Set grass count" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textAnimalCount" text="Starting Animal Count:" styleClass="text" />
+                    <TextField fx:id="animalCount" promptText="Set starting animal amount" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textAnimalEnergy" text="Animal Energy:" styleClass="text" />
+                    <TextField fx:id="animalEnergy" promptText="Set starting animal energy" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textMinEnergy" text="Minimal Reproduction Energy:" styleClass="text" />
+                    <TextField fx:id="reproductionMinEnergy" promptText="Set minimal energy for reproduction" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textUsedEnergy" text="Energy Used for Reproduction:" styleClass="text" />
+                    <TextField fx:id="reproductionUsedEnergy" promptText="Set amount of energy used for reproduction" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textMinMutation" text="Minimal Mutation Count:" styleClass="text" />
+                    <TextField fx:id="minMutationCount" promptText="Set minimal mutation count" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textMaxMutation" text="Maximal Mutation Count:" styleClass="text" />
+                    <TextField fx:id="maxMutationCount" promptText="Set maximal mutation count" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textGrassEnergy" text="Grass Energy:" styleClass="text" />
+                    <TextField fx:id="grassEnergy" promptText="Set amount of energy given by grass" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textGrassGrowth" text="Daily Grass Growth:" styleClass="text" />
+                    <TextField fx:id="grassGrowth" promptText="Set how many grass grows every day" styleClass="text-field" />
+                </HBox>
+                <HBox spacing="10">
+                    <Text fx:id="textGeneLength" text="Gene Length:" styleClass="text" />
+                    <TextField fx:id="geneLength" promptText="Set length of animals' genes" styleClass="text-field" />
+                </HBox>
+            </VBox>
+        </VBox>
+    </right>
+
+    <center>
+        <VBox alignment="CENTER" spacing="20" BorderPane.alignment="CENTER">
+            <ImageView fx:id="owlbear" fitHeight="200" fitWidth="200" preserveRatio="true" />
+            <Button fx:id="start" text="Start Simulation" styleClass="button" onAction="#startSimulation" />
+        </VBox>
+    </center>
+    <bottom>
+        <HBox spacing="20" alignment="CENTER" BorderPane.alignment="CENTER">
+            <Button fx:id="defaultData" text="Set default parameters" styleClass="button" onAction="#setDefault" />
+            <Button fx:id="importCustom" text="Import custom settings" styleClass="button" onAction="#importSettings" />
+            <Button fx:id="exportCustom" text="Export your settings" styleClass="button" onAction="#exportSettings" />
+        </HBox>
+    </bottom>
+</BorderPane>

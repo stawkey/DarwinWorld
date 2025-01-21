@@ -45,8 +45,8 @@ public class SimulationPresenter implements MapChangeListener {
     private World world;
     private int width = 100;
     private int height = 100;
-    private int maxWidth = 700;
-    private int maxHeight = 700;
+    private int maxWidth = 300;
+    private int maxHeight = 300;
 
     private int xMin;
     private int yMin;
@@ -55,13 +55,44 @@ public class SimulationPresenter implements MapChangeListener {
     private int mapWidth;
     private int mapHeight;
 
+    private SimulationConfig simulationConfig;
+
+    public void setSimulationConfig(SimulationConfig config) {
+        this.simulationConfig = config;
+    }
+
+
     public void toggleSimulation(ActionEvent actionEvent) {
         if(simulation == null) {
-//            simulation = new Simulation(20, 10, 10, 10, 10, 5, 5, 1, 5, 3, 5, 8);
-            simulation = new Simulation(5, 5, 5, 5, 5, 4, 3, 1, 5, 2, 3, 8);
+            // if you want to work on version without setup, comment the simulation with
+            // simulationConfig, surface variable and elif with surface variable
+            // if you want to make map bigger or smaller, use maxWidth and maxHeight above
+//            simulation = new Simulation(20, 20, 20, 50, 10, 5, 5, 1, 5, 3, 50, 8);
+            simulation = new Simulation(simulationConfig.getWidth(), simulationConfig.getHeight(), simulationConfig.getGrassCount(),
+                    simulationConfig.getAnimalCount(), simulationConfig.getAnimalEnergy(),
+                    simulationConfig.getReproductionMinEnergy(), simulationConfig.getReproductionUsedEnergy(),
+                    simulationConfig.getMinMutationCount(), simulationConfig.getMaxMutationCount(),
+                    simulationConfig.getGrassEnergy(), simulationConfig.getGrassGrowth(), simulationConfig.getGeneLength());
             this.world = simulation.getWorld();
             SimulationEngine engine = new SimulationEngine(List.of(simulation));
             engine.addListener(this);
+            int surface = simulationConfig.getWidth() * simulationConfig.getHeight();
+            if (surface >= 900) {
+                maxWidth = 1000;
+                maxHeight = 1000;
+            }
+            else if (surface >= 625) {
+                maxWidth = 800;
+                maxHeight = 800;
+            }
+            else if (surface >= 400) {
+                maxWidth = 600;
+                maxHeight = 600;
+            }
+            else if (surface >= 225) {
+                maxWidth = 400;
+                maxHeight = 400;
+            }
             toggleSimulationButton.setText("Pause");
             new Thread(engine::runSync).start();
         }

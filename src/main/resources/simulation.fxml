@@ -10,7 +10,7 @@
 <?import javafx.scene.text.Text?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            minHeight="550.0" minWidth="850.0"
+            minHeight="700.0" minWidth="900.0"
             stylesheets="simulation.css"
             fx:controller="agh.fcs.oop.GUI.SimulationPresenter">
     <top>
