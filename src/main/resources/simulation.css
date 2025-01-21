@@ -36,12 +36,17 @@
     -fx-padding: 10;
 }
 
-HBox {
+#bottomHBox {
     -fx-alignment: center;
     -fx-spacing: 20;
 }
 
-VBox {
+#leftVBox {
     -fx-alignment: center-left;
+    -fx-spacing: 10;
+}
+
+#rightVBox {
+    -fx-alignment: center-right;
     -fx-spacing: 10;
 }

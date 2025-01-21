@@ -80,7 +80,7 @@ public class Simulation implements Runnable {
                 notifySimulationStep("");
 
                 day++;
-                Thread.sleep(200);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -183,6 +183,10 @@ public class Simulation implements Runnable {
         }
         int totalChildren = animalList.stream().mapToInt(Animal::getChildrenNumber).sum();
         return Math.round((double) totalChildren / animalList.size() * 100.0) / 100.0;
+    }
+
+    public int getDay() {
+        return day;
     }
 
 }

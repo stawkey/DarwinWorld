@@ -19,8 +19,9 @@
         </VBox>
     </top>
     <left>
-        <VBox spacing="10" xmlns="http://javafx.com/javafx">
+        <VBox fx:id="leftVBox">
             <Text text="General Statistics"/>
+            <Text fx:id="day" />
             <Text fx:id="animalsCount"/>
             <Text fx:id="grassCount"/>
             <Text fx:id="emptyFields"/>
@@ -31,14 +32,13 @@
         </VBox>
     </left>
     <right>
-        <VBox>
+        <VBox fx:id="rightVBox">
             <Text text="Selected Animal Details"/>
             <Text fx:id="selectedAnimalGenome"/>
             <Text fx:id="selectedAnimalActiveGene"/>
             <Text fx:id="selectedAnimalEnergy"/>
             <Text fx:id="selectedAnimalGrassEaten"/>
             <Text fx:id="selectedAnimalChildren"/>
-            <Text fx:id="selectedAnimalDescendants"/>
             <Text fx:id="selectedAnimalAge"/>
             <Text fx:id="selectedAnimalDeathDay"/>
             <Button fx:id="stopTrackingButton" text="Stop Tracking" onAction="#stopTrackingSelectedAnimal"/>
@@ -48,7 +48,7 @@
         <GridPane fx:id="mapGrid" gridLinesVisible="true" alignment="CENTER"/>
     </center>
     <bottom>
-        <HBox xmlns="http://javafx.com/javafx" spacing="10">
+        <HBox fx:id="bottomHBox" xmlns="http://javafx.com/javafx" spacing="10">
             <Button fx:id="toggleSimulationButton" text="Pause" onAction="#toggleSimulation"/>
             <CheckBox fx:id="highlightPopularGene" text="Highlight popular gene"
                       onAction="#toggleHighlightPopularGene"/>
