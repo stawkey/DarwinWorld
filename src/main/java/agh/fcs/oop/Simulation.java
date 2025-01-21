@@ -16,6 +16,7 @@ public class Simulation implements Runnable {
     private volatile boolean paused = false;
     private final ArrayList<Animal> deadAnimals = new ArrayList<>();
     private int totalDeadAnimalsAge = 0;
+    private int day = 1;
 
     @Override
     public void run() {
@@ -38,6 +39,7 @@ public class Simulation implements Runnable {
                     animalList.remove(animal);
                     deadAnimals.add(animal);
                     totalDeadAnimalsAge += animal.getAge();
+                    animal.setDeathDay(day);
                 });
 
                 for (Animal animal : animalList) {
@@ -56,6 +58,7 @@ public class Simulation implements Runnable {
                     Vector2d position = animal.getPosition();
                     if (allElements.get(position) instanceof Grass) {
                         animal.setEnergy(animal.getEnergy() + grassEnergy);
+                        animal.incrementGrassEaten();
                         world.removeGrass(position);
                     }
                 }
@@ -76,6 +79,7 @@ public class Simulation implements Runnable {
                 world.generatingGrass(grassGrowth);
                 notifySimulationStep("");
 
+                day++;
                 Thread.sleep(200);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

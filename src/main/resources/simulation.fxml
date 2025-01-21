@@ -2,7 +2,6 @@
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.GridPane?>
@@ -16,27 +15,43 @@
             fx:controller="agh.fcs.oop.GUI.SimulationPresenter">
     <top>
         <VBox spacing="10" xmlns="http://javafx.com/javafx">
-            <Label fx:id="descriptionLabel" />
+            <Label fx:id="descriptionLabel"/>
         </VBox>
     </top>
     <left>
         <VBox spacing="10" xmlns="http://javafx.com/javafx">
-            <Text fx:id="animalsCount" />
-            <Text fx:id="grassCount" />
-            <Text fx:id="emptyFields" />
-            <Text fx:id="mostPopularGene" />
-            <Text fx:id="averageEnergy" />
-            <Text fx:id="averageLifespan" />
-            <Text fx:id="averageChildren" />
+            <Text text="General Statistics"/>
+            <Text fx:id="animalsCount"/>
+            <Text fx:id="grassCount"/>
+            <Text fx:id="emptyFields"/>
+            <Text fx:id="mostPopularGene"/>
+            <Text fx:id="averageEnergy"/>
+            <Text fx:id="averageLifespan"/>
+            <Text fx:id="averageChildren"/>
         </VBox>
     </left>
+    <right>
+        <VBox>
+            <Text text="Selected Animal Details"/>
+            <Text fx:id="selectedAnimalGenome"/>
+            <Text fx:id="selectedAnimalActiveGene"/>
+            <Text fx:id="selectedAnimalEnergy"/>
+            <Text fx:id="selectedAnimalGrassEaten"/>
+            <Text fx:id="selectedAnimalChildren"/>
+            <Text fx:id="selectedAnimalDescendants"/>
+            <Text fx:id="selectedAnimalAge"/>
+            <Text fx:id="selectedAnimalDeathDay"/>
+            <Button fx:id="stopTrackingButton" text="Stop Tracking" onAction="#stopTrackingSelectedAnimal"/>
+        </VBox>
+    </right>
     <center>
-        <GridPane fx:id="mapGrid" gridLinesVisible="true" alignment="CENTER" />
+        <GridPane fx:id="mapGrid" gridLinesVisible="true" alignment="CENTER"/>
     </center>
     <bottom>
         <HBox xmlns="http://javafx.com/javafx" spacing="10">
             <Button fx:id="toggleSimulationButton" text="Pause" onAction="#toggleSimulation"/>
-            <CheckBox fx:id="highlightPopularGene" text="Highlight popular gene" onAction="#toggleHighlightPopularGene"/>
+            <CheckBox fx:id="highlightPopularGene" text="Highlight popular gene"
+                      onAction="#toggleHighlightPopularGene"/>
         </HBox>
     </bottom>
 

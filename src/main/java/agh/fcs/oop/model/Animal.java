@@ -12,6 +12,9 @@ public class Animal implements WorldElement {
     private int currGene;
     private int age = 0;
     private int childrenNumber = 0;
+    private int grassEaten = 0;
+    ;
+    private int deathDay = -1;
 
     public Animal(Vector2d position, AnimalConfig animalConfig) {
         this.position = position;
@@ -83,16 +86,31 @@ public class Animal implements WorldElement {
         return currGene;
     }
 
+    public void incrementGrassEaten() {
+        grassEaten++;
+    }
+
+    public int getGrassEaten() {
+        return grassEaten;
+    }
+
+    public void setDeathDay(int day) {
+        this.deathDay = day;
+    }
+
+    public int getDeathDay() {
+        return deathDay;
+    }
+
 
     // direction is a number in range 0-7 where 0 represents no rotation, 1 is a rotation by 45 deg
     // then moves forwards by 1 unit vector
     public void move(WorldMap world) {
         int direction = gene.get(currGene);
 
-        if(ThreadLocalRandom.current().nextInt(5) % 5 == 0) {
+        if (ThreadLocalRandom.current().nextInt(5) % 5 == 0) {
             currGene += ThreadLocalRandom.current().nextInt(animalConfig.getGeneLength() - 1);
-        }
-        else {
+        } else {
             currGene++;
         }
         currGene = currGene % gene.size();

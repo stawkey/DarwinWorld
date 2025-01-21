@@ -17,12 +17,28 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
 
 public class SimulationPresenter implements MapChangeListener {
     @FXML
     public Button toggleSimulationButton;
+    @FXML
+    private Text selectedAnimalGenome;
+    @FXML
+    private Text selectedAnimalActiveGene;
+    @FXML
+    private Text selectedAnimalEnergy;
+    @FXML
+    private Text selectedAnimalGrassEaten;
+    @FXML
+    private Text selectedAnimalChildren;
+    @FXML
+    private Text selectedAnimalDescendants;
+    @FXML
+    private Text selectedAnimalAge;
+    @FXML
+    private Text selectedAnimalDeathDay;
+    @FXML
+    private Button stopTrackingButton;
     @FXML
     public Text animalsCount;
     @FXML
@@ -44,6 +60,7 @@ public class SimulationPresenter implements MapChangeListener {
     @FXML
     private GridPane mapGrid;
 
+    private Animal selectedAnimal;
     private boolean showPopularGene;
 
     private Simulation simulation;
@@ -68,6 +85,8 @@ public class SimulationPresenter implements MapChangeListener {
 
     public void initialize() {
         Platform.runLater(this::initializeSimulation);
+        stopTrackingButton.setVisible(selectedAnimal != null);
+        stopTrackingButton.setManaged(selectedAnimal != null);
     }
 
     private void initializeSimulation() {
@@ -107,13 +126,8 @@ public class SimulationPresenter implements MapChangeListener {
             descriptionLabel.setText(message);
 
             // Statistics
-            animalsCount.setText("Animals alive: " + world.animalCount());
-            grassCount.setText("Grasses: " + world.grassCount());
-            emptyFields.setText("Empty fields: " + (mapHeight * mapWidth - world.takenFields()));
-            mostPopularGene.setText("Most popular gene: " + simulation.getMostPopularGene());
-            averageEnergy.setText("Average animal energy: " + simulation.getAverageEnergy());
-            averageLifespan.setText("Average lifespan: " + simulation.getAverageLifeSpan());
-            averageChildren.setText("Average children count: " + simulation.getAverageChildrenCount());
+            updateGeneralStatistics();
+            updateSelectedAnimalDetails();
         });
     }
 
@@ -183,7 +197,9 @@ public class SimulationPresenter implements MapChangeListener {
                 if (world.isOccupied(pos)) {
                     WorldElement element = world.objectAt(pos);
                     if (element instanceof Animal) {
+                        Animal animal = (Animal) element;
                         cell.setStyle("-fx-background-color: rgba(0, 255, 255, 0.5);");
+                        cell.setOnMouseClicked(event -> selectAnimal(animal));
                     } else if (element instanceof Grass) {
                         cell.setStyle("-fx-background-color: rgba(0, 255, 0, 0.5);");
                     }
@@ -210,6 +226,11 @@ public class SimulationPresenter implements MapChangeListener {
                     }
                 }
 
+                // Show selected animal
+                if (selectedAnimal != null && selectedAnimal.getPosition().equals(pos)) {
+                    cell.setStyle("-fx-background-color: rgba(255,255,0,0.5);");
+                }
+
                 cell.setPrefSize(width, height);
                 mapGrid.add(cell, i - xMin + 1, yMax - j + 1);
                 GridPane.setHalignment(cell, HPos.CENTER);
@@ -217,6 +238,57 @@ public class SimulationPresenter implements MapChangeListener {
         }
     }
 
+    private void selectAnimal(Animal animal) {
+//        if (simulation.isPaused()) {
+            selectedAnimal = animal;
+            updateSelectedAnimalDetails();
+            stopTrackingButton.setVisible(selectedAnimal != null);
+            stopTrackingButton.setManaged(selectedAnimal != null);
+//        }
+    }
+
+    private void updateSelectedAnimalDetails() {
+        if (selectedAnimal != null) {
+            selectedAnimalGenome.setText("Genome: " + selectedAnimal.getGene());
+            selectedAnimalActiveGene.setText("Active Gene: " + selectedAnimal.getCurrGene());
+            selectedAnimalEnergy.setText("Energy: " + selectedAnimal.getEnergy());
+            selectedAnimalGrassEaten.setText("Grass Eaten: " + selectedAnimal.getGrassEaten());
+            selectedAnimalChildren.setText("Children: " + selectedAnimal.getChildrenNumber());
+            selectedAnimalDescendants.setText("Descendants: " + selectedAnimal.getChildrenNumber());
+            selectedAnimalAge.setText("Age: " + selectedAnimal.getAge());
+            selectedAnimalDeathDay.setText(selectedAnimal.isAlive() ? "Still alive" :
+                    "Died on day: " + selectedAnimal.getDeathDay());
+        }
+    }
+
+    @FXML
+    private void stopTrackingSelectedAnimal(ActionEvent actionEvent) {
+        selectedAnimal = null;
+        clearSelectedAnimalDetails();
+        stopTrackingButton.setVisible(selectedAnimal != null);
+        stopTrackingButton.setManaged(selectedAnimal != null);
+    }
+
+    private void clearSelectedAnimalDetails() {
+        selectedAnimalGenome.setText("");
+        selectedAnimalActiveGene.setText("");
+        selectedAnimalEnergy.setText("");
+        selectedAnimalGrassEaten.setText("");
+        selectedAnimalChildren.setText("");
+        selectedAnimalDescendants.setText("");
+        selectedAnimalAge.setText("");
+        selectedAnimalDeathDay.setText("");
+    }
+
+    private void updateGeneralStatistics() {
+        animalsCount.setText("Animals alive: " + world.animalCount());
+        grassCount.setText("Grasses: " + world.grassCount());
+        emptyFields.setText("Empty fields: " + (mapHeight * mapWidth - world.takenFields()));
+        mostPopularGene.setText("Most popular gene: " + simulation.getMostPopularGene());
+        averageEnergy.setText("Average animal energy: " + simulation.getAverageEnergy());
+        averageLifespan.setText("Average lifespan: " + simulation.getAverageLifeSpan());
+        averageChildren.setText("Average children count: " + simulation.getAverageChildrenCount());
+    }
 
     public void toggleHighlightPopularGene(ActionEvent actionEvent) {
         showPopularGene = !showPopularGene;
