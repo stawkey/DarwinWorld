@@ -17,6 +17,7 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class SimulationPresenter implements MapChangeListener {
@@ -181,10 +182,7 @@ public class SimulationPresenter implements MapChangeListener {
 
                 if (world.isOccupied(pos)) {
                     WorldElement element = world.objectAt(pos);
-
-                    if (element instanceof Animal animal && animal.getGene().equals(popularGene)) {
-                        cell.setStyle("-fx-background-color: rgba(255, 0, 0, 0.5);");
-                    } else if (element instanceof Animal) {
+                    if (element instanceof Animal) {
                         cell.setStyle("-fx-background-color: rgba(0, 255, 255, 0.5);");
                     } else if (element instanceof Grass) {
                         cell.setStyle("-fx-background-color: rgba(0, 255, 0, 0.5);");
@@ -193,12 +191,32 @@ public class SimulationPresenter implements MapChangeListener {
                     cell.setStyle("-fx-background-color: rgba(200, 200, 200, 0.5);");
                 }
 
+                // Show animals with most popular gene
+                if (popularGene != null) {
+                    List<Animal> animalsAtPosition = simulation.getAnimalList().stream()
+                            .filter(animal -> animal.getPosition().equals(pos))
+                            .toList();
+
+                    if (!animalsAtPosition.isEmpty()) {
+                        Animal selectedAnimal;
+                        selectedAnimal = animalsAtPosition.stream()
+                                .filter(animal -> animal.getGene().equals(popularGene))
+                                .findFirst()
+                                .orElse(animalsAtPosition.getFirst());
+
+                        if (selectedAnimal.getGene().equals(popularGene)) {
+                            cell.setStyle("-fx-background-color: rgba(255, 0, 0, 0.5);");
+                        }
+                    }
+                }
+
                 cell.setPrefSize(width, height);
                 mapGrid.add(cell, i - xMin + 1, yMax - j + 1);
                 GridPane.setHalignment(cell, HPos.CENTER);
             }
         }
     }
+
 
     public void toggleHighlightPopularGene(ActionEvent actionEvent) {
         showPopularGene = !showPopularGene;

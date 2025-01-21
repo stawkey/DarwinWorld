@@ -12,7 +12,7 @@ public class Simulation implements Runnable {
     private final int grassEnergy;
     private final int grassGrowth;
     private final int minEnergyForReproduction;
-    private List<MapChangeListener> listeners = new ArrayList<>();
+    private final List<MapChangeListener> listeners = new ArrayList<>();
     private volatile boolean paused = false;
     private final ArrayList<Animal> deadAnimals = new ArrayList<>();
     private int totalDeadAnimalsAge = 0;
