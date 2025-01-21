@@ -8,14 +8,14 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.util.List;
 
 
@@ -37,9 +37,13 @@ public class SimulationPresenter implements MapChangeListener {
     @FXML
     public Text averageChildren;
     @FXML
+    public CheckBox highlightPopularGene;
+    @FXML
     private Label descriptionLabel;
     @FXML
     private GridPane mapGrid;
+
+    private boolean showPopularGene;
 
     private Simulation simulation;
     private World world;
@@ -67,12 +71,14 @@ public class SimulationPresenter implements MapChangeListener {
 
     private void initializeSimulation() {
         if (simulation == null) {
+            showPopularGene = false;
             simulation = new Simulation(
                     simulationConfig.getWidth(), simulationConfig.getHeight(), simulationConfig.getGrassCount(),
                     simulationConfig.getAnimalCount(), simulationConfig.getAnimalEnergy(),
                     simulationConfig.getReproductionMinEnergy(), simulationConfig.getReproductionUsedEnergy(),
                     simulationConfig.getMinMutationCount(), simulationConfig.getMaxMutationCount(),
-                    simulationConfig.getGrassEnergy(), simulationConfig.getGrassGrowth(), simulationConfig.getGeneLength()
+                    simulationConfig.getGrassEnergy(), simulationConfig.getGrassGrowth(),
+                    simulationConfig.getGeneLength()
             );
             this.world = simulation.getWorld();
             SimulationEngine engine = new SimulationEngine(List.of(simulation));
@@ -102,17 +108,12 @@ public class SimulationPresenter implements MapChangeListener {
             // Statistics
             animalsCount.setText("Animals alive: " + world.animalCount());
             grassCount.setText("Grasses: " + world.grassCount());
-            emptyFields.setText("Empty fields: " + (mapHeight*mapWidth - world.takenFields()));
+            emptyFields.setText("Empty fields: " + (mapHeight * mapWidth - world.takenFields()));
             mostPopularGene.setText("Most popular gene: " + simulation.getMostPopularGene());
             averageEnergy.setText("Average animal energy: " + simulation.getAverageEnergy());
             averageLifespan.setText("Average lifespan: " + simulation.getAverageLifeSpan());
             averageChildren.setText("Average children count: " + simulation.getAverageChildrenCount());
         });
-    }
-
-    public void setSimulation(Simulation simulation) {
-        this.simulation = simulation;
-        this.world = simulation.getWorld();
     }
 
     public void drawMap() {
@@ -125,13 +126,13 @@ public class SimulationPresenter implements MapChangeListener {
         mapGrid.setGridLinesVisible(true);
     }
 
-    private void clearGrid(){
+    private void clearGrid() {
         mapGrid.getChildren().retainAll(mapGrid.getChildren().get(0));
         mapGrid.getColumnConstraints().clear();
         mapGrid.getRowConstraints().clear();
     }
 
-    public void xyLabel(){
+    public void xyLabel() {
         mapGrid.getColumnConstraints().add(new ColumnConstraints(width));
         mapGrid.getRowConstraints().add(new RowConstraints(height));
         Label label = new Label("y/x");
@@ -139,49 +140,68 @@ public class SimulationPresenter implements MapChangeListener {
         GridPane.setHalignment(label, HPos.CENTER);
     }
 
-    public void updateBounds(){
+    public void updateBounds() {
         xMin = 0;
         yMin = 0;
         xMax = world.getWidth() - 1;
         yMax = world.getHeight() - 1;
         mapWidth = xMax + 1;
         mapHeight = yMax + 1;
-        width = Math.round(maxWidth/mapWidth);
-        height = Math.round(maxHeight/mapHeight);
+        width = Math.round((float) maxWidth / mapWidth);
+        height = Math.round((float) maxHeight / mapHeight);
         height = Math.min(height, width);
         width = height;
     }
 
-    public void columnsFunction(){
-        for(int i=0; i<mapWidth; i++){
-            Label label = new Label(Integer.toString(i+xMin));
+    public void columnsFunction() {
+        for (int i = 0; i < mapWidth; i++) {
+            Label label = new Label(Integer.toString(i + xMin));
             GridPane.setHalignment(label, HPos.CENTER);
             mapGrid.getColumnConstraints().add(new ColumnConstraints(width));
-            mapGrid.add(label, i+1, 0);
+            mapGrid.add(label, i + 1, 0);
         }
     }
 
-    public void rowsFunction(){
-        for(int i=0; i<mapHeight; i++){
-            Label label = new Label(Integer.toString(yMax-i));
+    public void rowsFunction() {
+        for (int i = 0; i < mapHeight; i++) {
+            Label label = new Label(Integer.toString(yMax - i));
             GridPane.setHalignment(label, HPos.CENTER);
             mapGrid.getRowConstraints().add(new RowConstraints(height));
-            mapGrid.add(label, 0, i+1);
+            mapGrid.add(label, 0, i + 1);
         }
     }
 
-    public void addElements(){
+    public void addElements() {
+        List<Integer> popularGene = highlightPopularGene.isSelected() ? simulation.getMostPopularGene() : null;
+
         for (int i = xMin; i <= xMax; i++) {
             for (int j = yMax; j >= yMin; j--) {
                 Vector2d pos = new Vector2d(i, j);
+                Region cell = new Region();
+
                 if (world.isOccupied(pos)) {
-                    mapGrid.add(new Label(world.objectAt(pos).toString()), i - xMin + 1, yMax - j + 1);
+                    WorldElement element = world.objectAt(pos);
+
+                    if (element instanceof Animal animal && animal.getGene().equals(popularGene)) {
+                        cell.setStyle("-fx-background-color: rgba(255, 0, 0, 0.5);");
+                    } else if (element instanceof Animal) {
+                        cell.setStyle("-fx-background-color: rgba(0, 255, 255, 0.5);");
+                    } else if (element instanceof Grass) {
+                        cell.setStyle("-fx-background-color: rgba(0, 255, 0, 0.5);");
+                    }
+                } else {
+                    cell.setStyle("-fx-background-color: rgba(200, 200, 200, 0.5);");
                 }
-                else {
-                    mapGrid.add(new Label(" "), i - xMin + 1, yMax - j + 1);
-                }
-                mapGrid.setHalignment(mapGrid.getChildren().get(mapGrid.getChildren().size() - 1), HPos.CENTER);
+
+                cell.setPrefSize(width, height);
+                mapGrid.add(cell, i - xMin + 1, yMax - j + 1);
+                GridPane.setHalignment(cell, HPos.CENTER);
             }
         }
+    }
+
+    public void toggleHighlightPopularGene(ActionEvent actionEvent) {
+        showPopularGene = !showPopularGene;
+        drawMap();
     }
 }

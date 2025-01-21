@@ -8,6 +8,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.control.CheckBox?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             minHeight="700.0" minWidth="900.0"
@@ -33,8 +34,10 @@
         <GridPane fx:id="mapGrid" gridLinesVisible="true" alignment="CENTER" />
     </center>
     <bottom>
-        <HBox xmlns="http://javafx.com/javafx" >
+        <HBox xmlns="http://javafx.com/javafx" spacing="10">
             <Button fx:id="toggleSimulationButton" text="Pause" onAction="#toggleSimulation"/>
+            <CheckBox fx:id="highlightPopularGene" text="Highlight popular gene" onAction="#toggleHighlightPopularGene"/>
         </HBox>
     </bottom>
+
 </BorderPane>
