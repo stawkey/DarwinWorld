@@ -40,6 +40,7 @@
             <Text fx:id="selectedAnimalEnergy"/>
             <Text fx:id="selectedAnimalGrassEaten"/>
             <Text fx:id="selectedAnimalChildren"/>
+            <Text fx:id="selectedAnimalDescendants" />
             <Text fx:id="selectedAnimalAge"/>
             <Text fx:id="selectedAnimalDeathDay"/>
             <Button fx:id="stopTrackingButton" text="Stop Tracking" onAction="#stopTrackingSelectedAnimal"/>

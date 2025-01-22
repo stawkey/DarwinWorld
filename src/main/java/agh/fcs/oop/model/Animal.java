@@ -1,6 +1,7 @@
 package agh.fcs.oop.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Animal implements WorldElement {
@@ -13,8 +14,9 @@ public class Animal implements WorldElement {
     private int currGene;
     private int age = 0;
     private int childrenNumber = 0;
+    private int descendantsNumber = 0;
+    private HashSet<Animal> parents = new HashSet<>();
     private int grassEaten = 0;
-    ;
     private int deathDay = -1;
 
     public Animal(Vector2d position, AnimalConfig animalConfig, boolean variantSelector) {
@@ -77,6 +79,9 @@ public class Animal implements WorldElement {
         this.childrenNumber++;
         partner.childrenNumber++;
 
+        this.incrementDescendantsNumber();
+        partner.incrementDescendantsNumber();
+
         double proportion = (double) this.energy / (this.energy + partner.energy);
         int middlePoint = (int) (proportion * animalConfig.getGeneLength());
 
@@ -96,7 +101,23 @@ public class Animal implements WorldElement {
             offspringGene.set(geneIndex, ThreadLocalRandom.current().nextInt(8));
         }
 
-        return new Animal(this.position, animalConfig, offspringGene, variantSelector);
+        Animal kid = new Animal(this.position, animalConfig, offspringGene, variantSelector);
+        kid.addParent(this);
+        kid.addParent(partner);
+        return kid;
+    }
+
+    public void incrementDescendantsNumber() {
+        if (this.getEnergy() > 0) {
+            this.descendantsNumber++;
+            for (Animal parent : parents) {
+                parent.incrementDescendantsNumber();
+            }
+        }
+    }
+
+    public void addParent(Animal parent) {
+        parents.add(parent);
     }
 
     public boolean isAlive() {
@@ -129,6 +150,10 @@ public class Animal implements WorldElement {
 
     public int getChildrenNumber() {
         return childrenNumber;
+    }
+
+    public int getDescendantsNumber() {
+        return descendantsNumber;
     }
 
     public ArrayList<Integer> getGene() {

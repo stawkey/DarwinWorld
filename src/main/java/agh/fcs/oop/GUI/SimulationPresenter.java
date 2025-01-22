@@ -25,6 +25,8 @@ public class SimulationPresenter implements MapChangeListener {
     @FXML
     public Text day;
     @FXML
+    public Text selectedAnimalDescendants;
+    @FXML
     private Text selectedAnimalGenome;
     @FXML
     private Text selectedAnimalActiveGene;
@@ -308,6 +310,7 @@ public class SimulationPresenter implements MapChangeListener {
             selectedAnimalEnergy.setText("Energy: " + selectedAnimal.getEnergy());
             selectedAnimalGrassEaten.setText("Grass Eaten: " + selectedAnimal.getGrassEaten());
             selectedAnimalChildren.setText("Children: " + selectedAnimal.getChildrenNumber());
+            selectedAnimalDescendants.setText("Descendants: " + selectedAnimal.getDescendantsNumber());
             selectedAnimalAge.setText("Age: " + selectedAnimal.getAge());
             selectedAnimalDeathDay.setText(selectedAnimal.isAlive() ? "Still alive" :
                     "Died on day: " + selectedAnimal.getDeathDay());
