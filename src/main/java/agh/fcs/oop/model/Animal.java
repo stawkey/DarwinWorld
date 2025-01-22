@@ -7,6 +7,7 @@ public class Animal implements WorldElement {
     private final AnimalConfig animalConfig;
     private MapDirection facingDirection;
     private Vector2d position;
+    private boolean variantSelector;
     private int energy;
     private ArrayList<Integer> gene = new ArrayList<>();
     private int currGene;
@@ -16,12 +17,14 @@ public class Animal implements WorldElement {
     ;
     private int deathDay = -1;
 
-    public Animal(Vector2d position, AnimalConfig animalConfig) {
+    public Animal(Vector2d position, AnimalConfig animalConfig, boolean variantSelector) {
         this.position = position;
         facingDirection = MapDirection.randomDirection();
 
         this.animalConfig = animalConfig;
         energy = animalConfig.getStartAnimalEnergy();
+
+        this.variantSelector = variantSelector;
 
         currGene = ThreadLocalRandom.current().nextInt(animalConfig.getGeneLength());
         for (int i = 0; i < animalConfig.getGeneLength(); i++) {
@@ -30,12 +33,14 @@ public class Animal implements WorldElement {
     }
 
     // this constructor is going to be used for creating offspring
-    public Animal(Vector2d position, AnimalConfig animalConfig, ArrayList<Integer> gene) {
+    public Animal(Vector2d position, AnimalConfig animalConfig, ArrayList<Integer> gene, boolean variantSelector) {
         this.position = position;
         facingDirection = MapDirection.randomDirection();
 
         this.animalConfig = animalConfig;
         energy = animalConfig.getEnergyUsedForReproduction() * 2;
+
+        this.variantSelector = variantSelector;
 
         this.gene = gene;
         currGene = ThreadLocalRandom.current().nextInt(animalConfig.getGeneLength());
@@ -107,10 +112,14 @@ public class Animal implements WorldElement {
     // then moves forwards by 1 unit vector
     public void move(WorldMap world) {
         int direction = gene.get(currGene);
-
-        if (ThreadLocalRandom.current().nextInt(5) % 5 == 0) {
-            currGene += ThreadLocalRandom.current().nextInt(animalConfig.getGeneLength() - 1);
-        } else {
+        if (variantSelector) {
+            if (ThreadLocalRandom.current().nextInt(5) % 5 == 0) {
+                currGene += ThreadLocalRandom.current().nextInt(animalConfig.getGeneLength() - 1);
+            } else {
+                currGene++;
+            }
+        }
+        else {
             currGene++;
         }
         currGene = currGene % gene.size();
@@ -150,7 +159,7 @@ public class Animal implements WorldElement {
             offspringGene.set(geneIndex, ThreadLocalRandom.current().nextInt(8));
         }
 
-        return new Animal(this.position, animalConfig, offspringGene);
+        return new Animal(this.position, animalConfig, offspringGene, variantSelector);
     }
 
     public boolean isAlive() {

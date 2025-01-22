@@ -9,6 +9,7 @@ public class WorldPoles extends World {
         this.poleFields = height / 5 + 1;
     }
 
+
     public int getPoleFields() {
         return poleFields;
     }

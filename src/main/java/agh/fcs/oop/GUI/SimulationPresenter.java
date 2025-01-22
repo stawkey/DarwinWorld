@@ -97,12 +97,12 @@ public class SimulationPresenter implements MapChangeListener {
     private void initializeSimulation() {
         if (simulation == null) {
             showPopularGene = false;
-            simulation = new Simulation(simulationConfig.getWidth(), simulationConfig.getHeight(),
+            simulation = new Simulation(simulationConfig.getMapType(), simulationConfig.getAnimalType(), simulationConfig.getWidth(), simulationConfig.getHeight(),
                     simulationConfig.getGrassCount(), simulationConfig.getAnimalCount(),
                     simulationConfig.getAnimalEnergy(), simulationConfig.getReproductionMinEnergy(),
                     simulationConfig.getReproductionUsedEnergy(), simulationConfig.getMinMutationCount(),
                     simulationConfig.getMaxMutationCount(), simulationConfig.getGrassEnergy(),
-                    simulationConfig.getGrassGrowth(), simulationConfig.getGeneLength());
+                    simulationConfig.getGrassGrowth(), simulationConfig.getGeneLength(), simulationConfig.getSleepDuration());
             this.world = simulation.getWorld();
             SimulationEngine engine = new SimulationEngine(List.of(simulation));
             engine.addListener(this);
@@ -211,8 +211,12 @@ public class SimulationPresenter implements MapChangeListener {
                         cell.setStyle("-fx-background-color: rgba(0, 255, 0, 0.5);");
                     }
                 } else {
-                    // TODO: add równik trawa ciemna
+                    if (pos.follows(world.getEquatorLeftCorner()) && pos.precedes(world.getEquatorRightCorner())) {
+                        cell.setStyle("-fx-background-color: rgba(6, 64, 43, 1);");
+                    }
+                    else {
                     cell.setStyle("-fx-background-color: rgba(200, 200, 200, 0.5);");
+                    }
                 }
 
                 // Show animals with most popular gene

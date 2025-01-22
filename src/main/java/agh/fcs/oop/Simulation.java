@@ -15,7 +15,9 @@ public class Simulation implements Runnable {
     private final int grassEnergy;
     private final int grassGrowth;
     private final int minEnergyForReproduction;
+    private final int refreshTime;
     private final List<MapChangeListener> listeners = new ArrayList<>();
+    boolean animalFlag;
     private volatile boolean paused = false;
     private final ArrayList<Animal> deadAnimals = new ArrayList<>();
     private int totalDeadAnimalsAge = 0;
@@ -49,9 +51,9 @@ public class Simulation implements Runnable {
                 for (Animal animal : animalList) {
                     world.move(animal);
                     if (world instanceof WorldPoles) {
-                        if (animal.getPosition().x() >= world.getWidth() - 1 - ((WorldPoles) world).getPoleFields() / 2 || animal.getPosition().x() <= ((WorldPoles) world).getPoleFields() / 2) {
+                        if (animal.getPosition().y() > world.getWidth() - 1 - (((WorldPoles) world).getPoleFields() / 2 )|| animal.getPosition().y() < ((WorldPoles) world).getPoleFields() / 2) {
                             animal.setEnergy(animal.getEnergy() - 2);
-                        } else if (animal.getPosition().x() >= world.getWidth() - 1 - ((WorldPoles) world).getPoleFields() || animal.getPosition().x() <= ((WorldPoles) world).getPoleFields()) {
+                        } else if (animal.getPosition().y() > world.getWidth() - 1 - ((WorldPoles) world).getPoleFields() || animal.getPosition().y() < ((WorldPoles) world).getPoleFields()) {
                             animal.setEnergy(animal.getEnergy() - 1);
                         }
                     }
@@ -85,7 +87,7 @@ public class Simulation implements Runnable {
 
                 writeStatisticsToCsv(day);
                 day++;
-                Thread.sleep(50);
+                Thread.sleep(refreshTime);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -110,10 +112,26 @@ public class Simulation implements Runnable {
         return animalList;
     }
 
-    public Simulation(int width, int height, int startGrassCount, int startAnimalCount, int startAnimalEnergy,
+    public Simulation(String mapType, String animalType, int width, int height,
+                      int startGrassCount, int startAnimalCount, int startAnimalEnergy,
                       int minReproductionEnergy, int energyUsedForReproduction, int minMutationCount,
-                      int maxMutationCount, int grassEnergy, int grassGrowth, int geneLength) {
-        this.world = new World(width, height, startGrassCount);
+                      int maxMutationCount, int grassEnergy, int grassGrowth,
+                      int geneLength, int refreshTime) {
+        if (mapType.equals("Globe")) {
+            this.world = new WorldGlobe(width, height, startGrassCount);
+        }
+        else if (mapType.equals("Poles")) {
+            this.world = new WorldPoles(width, height, startGrassCount);
+        }
+        else {
+            this.world = new World(width, height, startGrassCount);
+        }
+        if (animalType.equals("Crazy animals")) {
+            this.animalFlag = true;
+        }
+        else {
+            this.animalFlag = false;
+        }
         ConsoleMapDisplay observer = new ConsoleMapDisplay();
         this.world.addObserver(observer);
 
@@ -123,7 +141,7 @@ public class Simulation implements Runnable {
         for (int i = 0; i < startAnimalCount; i++) {
             Vector2d position = new Vector2d(ThreadLocalRandom.current().nextInt(0, width - 1),
                     ThreadLocalRandom.current().nextInt(0, height - 1));
-            animalList.add(new Animal(position, animalConfig));
+            animalList.add(new Animal(position, animalConfig, animalFlag));
         }
 
         for (Animal a : animalList) {
@@ -137,6 +155,7 @@ public class Simulation implements Runnable {
         this.grassEnergy = grassEnergy;
         this.grassGrowth = grassGrowth;
         this.minEnergyForReproduction = minReproductionEnergy;
+        this.refreshTime = refreshTime;
         initializeCsvWriter();
     }
 
@@ -200,7 +219,6 @@ public class Simulation implements Runnable {
         String fileName = "simulation_" + UUID.randomUUID() + ".csv";
         try {
             csvWriter = new BufferedWriter(new FileWriter(fileName));
-            // Nagłówki kolumn
             csvWriter.write("Day;AnimalsCount;GrassCount;EmptyFields;MostPopularGene;AverageEnergy;AverageLifespan;AverageChildrenCount");
             csvWriter.newLine();
         } catch (IOException e) {
@@ -229,6 +247,7 @@ public class Simulation implements Runnable {
         if (csvWriter != null) {
             try {
                 csvWriter.close();
+                csvWriter = null;
             } catch (IOException e) {
                 System.err.println("Error closing CSV writer: " + e.getMessage());
             }

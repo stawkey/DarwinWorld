@@ -69,6 +69,8 @@ public class SimulationSetup {
     private TextField grassGrowth;
     @FXML
     private TextField geneLength;
+    @FXML
+    private TextField sleepDuration;
 
 
     @FXML
@@ -107,6 +109,8 @@ public class SimulationSetup {
         grassGrowth.setText(valueOf(defaultGrassGrowth));
         int defaultGeneLength = 8;
         geneLength.setText(valueOf(defaultGeneLength));
+        int defaultSleepDuration = 100;
+        sleepDuration.setText(valueOf(defaultSleepDuration));
     }
 
     @FXML
@@ -150,6 +154,7 @@ public class SimulationSetup {
                 grassEnergy.setText(reader.readLine());
                 grassGrowth.setText(reader.readLine());
                 geneLength.setText(reader.readLine());
+                sleepDuration.setText(reader.readLine());
 
                 System.out.println("Settings successfully imported!");
             } catch (IOException e) {
@@ -199,6 +204,8 @@ public class SimulationSetup {
                 writer.newLine();
                 writer.write(geneLength.getText());
                 writer.newLine();
+                writer.write(sleepDuration.getText());
+                writer.newLine();
 
                 System.out.println("Settings successfully exported!");
             } catch (IOException e) {
@@ -212,8 +219,8 @@ public class SimulationSetup {
     private void startSimulation() {
         SimulationConfig config = new SimulationConfig();
         config.setMapType(((RadioButton) toggleGroup.getSelectedToggle()).getText());
+        System.out.println(config.getMapType());
         config.setAnimalType(((RadioButton) toggleGroup2.getSelectedToggle()).getText());
-        System.out.println(width.getText());
         config.setWidth(Integer.parseInt(width.getText()));
         config.setHeight(Integer.parseInt(height.getText()));
         config.setGrassCount(Integer.parseInt(grassCount.getText()));
@@ -226,6 +233,7 @@ public class SimulationSetup {
         config.setGrassEnergy(Integer.parseInt(grassEnergy.getText()));
         config.setGrassGrowth(Integer.parseInt(grassGrowth.getText()));
         config.setGeneLength(Integer.parseInt(geneLength.getText()));
+        config.setSleepDuration(Integer.parseInt(sleepDuration.getText()));
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/simulation.fxml"));

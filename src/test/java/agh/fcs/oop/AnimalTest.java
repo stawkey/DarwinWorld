@@ -16,7 +16,7 @@ public class AnimalTest {
     public void testAnimalInitialization() {
         Vector2d startPosition = new Vector2d(2, 2);
 
-        Animal animal = new Animal(startPosition, animalConfig);
+        Animal animal = new Animal(startPosition, animalConfig, false);
 
         assertEquals(startPosition, animal.getPosition());
         assertEquals(10, animal.getEnergy());
@@ -26,7 +26,7 @@ public class AnimalTest {
 
     @Test
     public void testAnimalMove() {
-        Animal animal = new Animal(new Vector2d(9, 9), animalConfig);
+        Animal animal = new Animal(new Vector2d(9, 9), animalConfig, false);
 
         for (int i = animal.getCurrGene(); i < animal.getCurrGene() + animal.getGene().size(); i++) {
             Vector2d oldPosition = animal.getPosition(); // 4,4
@@ -43,7 +43,7 @@ public class AnimalTest {
     public void testAnimalMoveOutOfMap()
     {
         World world2 = new World(1, 1, 10);
-        Animal animal = new Animal(new Vector2d(0,0), animalConfig);
+        Animal animal = new Animal(new Vector2d(0,0), animalConfig, false);
         for (int i = 0; i < animal.getGene().size(); i++) {
             animal.move(world2);
             assertEquals(new Vector2d(0,0), animal.getPosition());
@@ -53,8 +53,8 @@ public class AnimalTest {
     @Test
     public void testAnimalReproduce() {
         Vector2d position = new Vector2d(0, 0);
-        Animal parent1 = new Animal(position, animalConfig);
-        Animal parent2 = new Animal(position, animalConfig);
+        Animal parent1 = new Animal(position, animalConfig, false);
+        Animal parent2 = new Animal(position, animalConfig, false);
 
         parent1.reproduce(parent2);
 
@@ -68,7 +68,7 @@ public class AnimalTest {
     public void testAnimalDiesWhenEnergyDepleted() {
         Vector2d position = new Vector2d(2, 2);
 
-        Animal animal = new Animal(position, animalConfig);
+        Animal animal = new Animal(position, animalConfig, false);
         animal.setEnergy(0);
 
         assertFalse(animal.isAlive());
@@ -78,8 +78,8 @@ public class AnimalTest {
     public void testAnimalMutation() {
         Vector2d position = new Vector2d(2, 2);
 
-        Animal parent1 = new Animal(position, animalConfig);
-        Animal parent2 = new Animal(position, animalConfig);
+        Animal parent1 = new Animal(position, animalConfig, false);
+        Animal parent2 = new Animal(position, animalConfig, false);
 
         parent1.reproduce(parent2);
     }

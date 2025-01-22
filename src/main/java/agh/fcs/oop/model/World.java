@@ -86,6 +86,14 @@ public class World implements WorldMap {
         return height;
     }
 
+    public Vector2d getEquatorLeftCorner() {
+        return equatorLeftCorner;
+    }
+
+    public Vector2d getEquatorRightCorner() {
+        return equatorRightCorner;
+    }
+
     public List<Vector2d> preferredGrassPositions() {
         List<Vector2d> betterGrass = new ArrayList<>();
         for (int i = equatorLeftCorner.x(); i <= equatorRightCorner.x(); i++) {

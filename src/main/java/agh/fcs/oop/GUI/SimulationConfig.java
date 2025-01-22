@@ -15,6 +15,7 @@ public class SimulationConfig {
     private int grassEnergy;
     private int grassGrowth;
     private int geneLength;
+    private int sleepDuration;
 
     // TODO: Interaction with map and animal variations
     public String getMapType() { return mapType; }
@@ -58,4 +59,7 @@ public class SimulationConfig {
 
     public int getGeneLength() { return geneLength; }
     public void setGeneLength(int geneLength) { this.geneLength = geneLength; }
+
+    public int getSleepDuration() { return sleepDuration; }
+    public void setSleepDuration(int sleepDuration) { this.sleepDuration = sleepDuration; }
 }
