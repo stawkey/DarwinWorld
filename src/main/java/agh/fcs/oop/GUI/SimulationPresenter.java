@@ -68,8 +68,6 @@ public class SimulationPresenter implements MapChangeListener {
     private World world;
     private int width = 100;
     private int height = 100;
-    private int maxWidth = 300;
-    private int maxHeight = 300;
 
     private int xMin;
     private int yMin;
@@ -97,12 +95,14 @@ public class SimulationPresenter implements MapChangeListener {
     private void initializeSimulation() {
         if (simulation == null) {
             showPopularGene = false;
-            simulation = new Simulation(simulationConfig.getMapType(), simulationConfig.getAnimalType(), simulationConfig.getWidth(), simulationConfig.getHeight(),
+            simulation = new Simulation(simulationConfig.getMapType(), simulationConfig.getAnimalType(),
+                    simulationConfig.getWidth(), simulationConfig.getHeight(),
                     simulationConfig.getGrassCount(), simulationConfig.getAnimalCount(),
                     simulationConfig.getAnimalEnergy(), simulationConfig.getReproductionMinEnergy(),
                     simulationConfig.getReproductionUsedEnergy(), simulationConfig.getMinMutationCount(),
                     simulationConfig.getMaxMutationCount(), simulationConfig.getGrassEnergy(),
-                    simulationConfig.getGrassGrowth(), simulationConfig.getGeneLength(), simulationConfig.getSleepDuration());
+                    simulationConfig.getGrassGrowth(), simulationConfig.getGeneLength(),
+                    simulationConfig.getSleepDuration());
             this.world = simulation.getWorld();
             SimulationEngine engine = new SimulationEngine(List.of(simulation));
             engine.addListener(this);
@@ -111,6 +111,7 @@ public class SimulationPresenter implements MapChangeListener {
         }
     }
 
+    // Pausing simulation
     public void toggleSimulation(ActionEvent actionEvent) {
         if (simulation.isPaused()) {
             simulation.resume();
@@ -150,14 +151,6 @@ public class SimulationPresenter implements MapChangeListener {
         mapGrid.getRowConstraints().clear();
     }
 
-    public void xyLabel() {
-        mapGrid.getColumnConstraints().add(new ColumnConstraints(width));
-        mapGrid.getRowConstraints().add(new RowConstraints(height));
-        Label label = new Label("y/x");
-        mapGrid.add(label, 0, 0);
-        GridPane.setHalignment(label, HPos.CENTER);
-    }
-
     public void updateBounds() {
         xMin = 0;
         yMin = 0;
@@ -165,10 +158,20 @@ public class SimulationPresenter implements MapChangeListener {
         yMax = world.getHeight() - 1;
         mapWidth = xMax + 1;
         mapHeight = yMax + 1;
+        int maxWidth = 400;
+        int maxHeight = 400;
         width = Math.round((float) maxWidth / mapWidth);
         height = Math.round((float) maxHeight / mapHeight);
         height = Math.min(height, width);
         width = height;
+    }
+
+    public void xyLabel() {
+        mapGrid.getColumnConstraints().add(new ColumnConstraints(width));
+        mapGrid.getRowConstraints().add(new RowConstraints(height));
+        Label label = new Label("y/x");
+        mapGrid.add(label, 0, 0);
+        GridPane.setHalignment(label, HPos.CENTER);
     }
 
     public void columnsFunction() {
@@ -192,16 +195,20 @@ public class SimulationPresenter implements MapChangeListener {
     public void addElements() {
         List<Integer> popularGene = highlightPopularGene.isSelected() ? simulation.getMostPopularGene() : null;
 
+        // Check every grid cell
         for (int i = xMin; i <= xMax; i++) {
             for (int j = yMax; j >= yMin; j--) {
                 Vector2d pos = new Vector2d(i, j);
                 Region cell = new Region();
 
+                // Coloring grid; light green=grass; dark green=equator; gray=empty; red=animals with most popular
+                // gene; yellow=selected animal; blue=animal
                 if (world.isOccupied(pos)) {
                     WorldElement element = world.objectAt(pos);
                     if (element instanceof Animal isDead && isDead.getEnergy() > 0) {
                         Animal highestEnergyAnimal =
-                                simulation.getAnimalList().stream().filter(animal -> animal.getPosition().equals(pos)).toList().getFirst();
+                                simulation.getAnimalList().stream().filter(animal -> animal.getPosition().equals(pos) && animal.getEnergy() > 0)
+                                        .toList().getFirst();
 
                         String colorStyle = getColorStyle(highestEnergyAnimal);
                         cell.setStyle(colorStyle);
@@ -212,22 +219,23 @@ public class SimulationPresenter implements MapChangeListener {
                     }
                 } else {
                     if (pos.follows(world.getEquatorLeftCorner()) && pos.precedes(world.getEquatorRightCorner())) {
-                        cell.setStyle("-fx-background-color: rgba(6, 64, 43, 1);");
-                    }
-                    else {
-                    cell.setStyle("-fx-background-color: rgba(200, 200, 200, 0.5);");
+                        cell.setStyle("-fx-background-color: rgba(0,147,36,0.5);");
+                    } else {
+                        cell.setStyle("-fx-background-color: rgba(200, 200, 200, 0.5);");
                     }
                 }
 
                 // Show animals with most popular gene
                 if (popularGene != null) {
                     List<Animal> animalsAtPosition =
-                            simulation.getAnimalList().stream().filter(animal -> animal.getPosition().equals(pos)).toList();
+                            simulation.getAnimalList().stream().filter(animal -> animal.getPosition().equals(pos))
+                                    .toList();
 
                     if (!animalsAtPosition.isEmpty()) {
                         Animal selectedAnimal;
                         selectedAnimal =
-                                animalsAtPosition.stream().filter(animal -> animal.getGene().equals(popularGene)).findFirst().orElse(animalsAtPosition.getFirst());
+                                animalsAtPosition.stream().filter(animal -> animal.getGene().equals(popularGene))
+                                        .findFirst().orElse(animalsAtPosition.getFirst());
 
                         if (selectedAnimal.getGene().equals(popularGene)) {
                             cell.setStyle("-fx-background-color: rgba(255, 0, 0, 0.5);");
@@ -248,7 +256,7 @@ public class SimulationPresenter implements MapChangeListener {
     }
 
     private static String getColorStyle(Animal animal) {
-        double parameter = Math.min(1, animal.getEnergy() / 100.0); // Przy energii > x, parameter = 1
+        double parameter = Math.log10(animal.getEnergy() + 1) / Math.log10(101);
 
         int blue = (int) (255 * (1 - parameter));
         int redGreen = 0;
@@ -257,13 +265,11 @@ public class SimulationPresenter implements MapChangeListener {
     }
 
     private void selectAnimal(Animal animal) {
-//        if (simulation.isPaused()) {
         selectedAnimal = animal;
         drawMap();
         updateSelectedAnimalDetails();
         stopTrackingButton.setVisible(selectedAnimal != null);
         stopTrackingButton.setManaged(selectedAnimal != null);
-//        }
     }
 
     @FXML

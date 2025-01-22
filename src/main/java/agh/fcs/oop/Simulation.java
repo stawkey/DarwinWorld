@@ -12,21 +12,23 @@ import java.util.stream.Collectors;
 public class Simulation implements Runnable {
     private final World world;
     private final ArrayList<Animal> animalList;
+    private final ArrayList<Animal> deadAnimals = new ArrayList<>();
+    private final List<MapChangeListener> listeners = new ArrayList<>();
     private final int grassEnergy;
     private final int grassGrowth;
     private final int minEnergyForReproduction;
     private final int refreshTime;
-    private final List<MapChangeListener> listeners = new ArrayList<>();
     boolean animalFlag;
     private volatile boolean paused = false;
-    private final ArrayList<Animal> deadAnimals = new ArrayList<>();
     private int totalDeadAnimalsAge = 0;
     private int day = 1;
     private BufferedWriter csvWriter;
 
     @Override
     public void run() {
+        // Simulation loop
         while (!animalList.isEmpty()) {
+            // Pausing
             synchronized (this) {
                 while (paused) {
                     try {
@@ -37,9 +39,10 @@ public class Simulation implements Runnable {
                 }
             }
 
+            // Simulation logic
             try {
+                // Remove dead animals
                 List<Animal> toRemove = animalList.stream().filter(animal -> !animal.isAlive()).toList();
-
                 toRemove.forEach(animal -> {
                     world.removeAnimal(animal);
                     animalList.remove(animal);
@@ -48,17 +51,23 @@ public class Simulation implements Runnable {
                     animal.setDeathDay(day);
                 });
 
+                // Animals movement + world poles
                 for (Animal animal : animalList) {
                     world.move(animal);
                     if (world instanceof WorldPoles) {
-                        if (animal.getPosition().y() > world.getWidth() - 1 - (((WorldPoles) world).getPoleFields() / 2 )|| animal.getPosition().y() < ((WorldPoles) world).getPoleFields() / 2) {
+                        if (animal.getPosition().y() >
+                                world.getWidth() - 1 - (((WorldPoles) world).getPoleFields() / 2) ||
+                                animal.getPosition().y() < ((WorldPoles) world).getPoleFields() / 2) {
                             animal.setEnergy(animal.getEnergy() - 2);
-                        } else if (animal.getPosition().y() > world.getWidth() - 1 - ((WorldPoles) world).getPoleFields() || animal.getPosition().y() < ((WorldPoles) world).getPoleFields()) {
+                        } else if (animal.getPosition().y() >
+                                world.getWidth() - 1 - ((WorldPoles) world).getPoleFields() ||
+                                animal.getPosition().y() < ((WorldPoles) world).getPoleFields()) {
                             animal.setEnergy(animal.getEnergy() - 1);
                         }
                     }
                 }
 
+                // Eating grass
                 Map<Vector2d, WorldElement> allElements = world.getElements();
                 for (Animal animal : animalList) {
                     Vector2d position = animal.getPosition();
@@ -69,19 +78,25 @@ public class Simulation implements Runnable {
                     }
                 }
 
+                // Animals reproduction
                 Map<Vector2d, List<Animal>> animalsGroupedByPosition =
-                        animalList.stream().filter(a -> a.getEnergy() > minEnergyForReproduction).collect(Collectors.groupingBy(Animal::getPosition));
+                        animalList.stream().filter(a -> a.getEnergy() > minEnergyForReproduction)
+                                .collect(Collectors.groupingBy(Animal::getPosition));
 
-                animalsGroupedByPosition.values().stream().map(a -> a.stream().sorted(Comparator.comparingInt(Animal::getEnergy).reversed().thenComparingInt(Animal::getAge).reversed().thenComparingInt(Animal::getChildrenNumber).reversed()).limit(2).toList()).filter(pair -> pair.size() == 2).forEach(pair -> {
-                    Animal offspring = pair.get(0).reproduce(pair.get(1));
-                    animalList.add(offspring);
-                    try {
-                        world.place(offspring);
-                    } catch (IncorrectPositionException e) {
-                        System.out.println("Incorrect position: " + offspring.getPosition());
-                    }
-                });
+                animalsGroupedByPosition.values().stream().map(a -> a.stream()
+                                .sorted(Comparator.comparingInt(Animal::getEnergy).reversed().thenComparingInt(Animal::getAge)
+                                        .reversed().thenComparingInt(Animal::getChildrenNumber).reversed()).limit(2).toList())
+                        .filter(pair -> pair.size() == 2).forEach(pair -> {
+                            Animal offspring = pair.get(0).reproduce(pair.get(1));
+                            animalList.add(offspring);
+                            try {
+                                world.place(offspring);
+                            } catch (IncorrectPositionException e) {
+                                System.out.println("Incorrect position: " + offspring.getPosition());
+                            }
+                        });
 
+                // Grow new grass
                 world.generatingGrass(grassGrowth);
                 notifySimulationStep("");
 
@@ -112,53 +127,6 @@ public class Simulation implements Runnable {
         return animalList;
     }
 
-    public Simulation(String mapType, String animalType, int width, int height,
-                      int startGrassCount, int startAnimalCount, int startAnimalEnergy,
-                      int minReproductionEnergy, int energyUsedForReproduction, int minMutationCount,
-                      int maxMutationCount, int grassEnergy, int grassGrowth,
-                      int geneLength, int refreshTime) {
-        if (mapType.equals("Globe")) {
-            this.world = new WorldGlobe(width, height, startGrassCount);
-        }
-        else if (mapType.equals("Poles")) {
-            this.world = new WorldPoles(width, height, startGrassCount);
-        }
-        else {
-            this.world = new World(width, height, startGrassCount);
-        }
-        if (animalType.equals("Crazy animals")) {
-            this.animalFlag = true;
-        }
-        else {
-            this.animalFlag = false;
-        }
-        ConsoleMapDisplay observer = new ConsoleMapDisplay();
-        this.world.addObserver(observer);
-
-        this.animalList = new ArrayList<>();
-        AnimalConfig animalConfig = new AnimalConfig(startAnimalEnergy, energyUsedForReproduction, minMutationCount,
-                maxMutationCount, geneLength);
-        for (int i = 0; i < startAnimalCount; i++) {
-            Vector2d position = new Vector2d(ThreadLocalRandom.current().nextInt(0, width - 1),
-                    ThreadLocalRandom.current().nextInt(0, height - 1));
-            animalList.add(new Animal(position, animalConfig, animalFlag));
-        }
-
-        for (Animal a : animalList) {
-            try {
-                world.place(a);
-            } catch (IncorrectPositionException e) {
-                System.out.println("Incorrect position: " + a.getPosition());
-            }
-        }
-
-        this.grassEnergy = grassEnergy;
-        this.grassGrowth = grassGrowth;
-        this.minEnergyForReproduction = minReproductionEnergy;
-        this.refreshTime = refreshTime;
-        initializeCsvWriter();
-    }
-
     public void addListener(MapChangeListener listener) {
         listeners.add(listener);
     }
@@ -184,7 +152,8 @@ public class Simulation implements Runnable {
                 }
             }
 
-            return geneFrequency.entrySet().stream().max(Map.Entry.comparingByValue()).orElseThrow(() -> new IllegalStateException("No genes found")).getKey();
+            return geneFrequency.entrySet().stream().max(Map.Entry.comparingByValue())
+                    .orElseThrow(() -> new IllegalStateException("No genes found")).getKey();
         }
     }
 
@@ -219,7 +188,8 @@ public class Simulation implements Runnable {
         String fileName = "simulation_" + UUID.randomUUID() + ".csv";
         try {
             csvWriter = new BufferedWriter(new FileWriter(fileName));
-            csvWriter.write("Day;AnimalsCount;GrassCount;EmptyFields;MostPopularGene;AverageEnergy;AverageLifespan;AverageChildrenCount");
+            csvWriter.write("Day;AnimalsCount;GrassCount;EmptyFields;MostPopularGene;AverageEnergy;AverageLifespan;" +
+                    "AverageChildrenCount");
             csvWriter.newLine();
         } catch (IOException e) {
             System.err.println("Error initializing CSV writer: " + e.getMessage());
@@ -228,14 +198,9 @@ public class Simulation implements Runnable {
 
     public void writeStatisticsToCsv(int day) {
         try {
-            csvWriter.write(day + ";" +
-                    world.animalCount() + ";" +
-                    world.grassCount() + ";" +
-                    (world.getHeight() * world.getWidth() - world.takenFields()) + ";" +
-                    getMostPopularGene() + ";" +
-                    getAverageEnergy() + ";" +
-                    getAverageLifeSpan() + ";" +
-                    getAverageChildrenCount());
+            csvWriter.write(day + ";" + world.animalCount() + ";" + world.grassCount() + ";" +
+                    (world.getHeight() * world.getWidth() - world.takenFields()) + ";" + getMostPopularGene() + ";" +
+                    getAverageEnergy() + ";" + getAverageLifeSpan() + ";" + getAverageChildrenCount());
             csvWriter.newLine();
             csvWriter.flush();
         } catch (IOException e) {
@@ -254,4 +219,43 @@ public class Simulation implements Runnable {
         }
     }
 
+    public Simulation(String mapType, String animalType, int width, int height, int startGrassCount,
+                      int startAnimalCount, int startAnimalEnergy, int minReproductionEnergy,
+                      int energyUsedForReproduction, int minMutationCount, int maxMutationCount, int grassEnergy,
+                      int grassGrowth, int geneLength, int refreshTime) {
+        if (mapType.equals("Globe")) {
+            this.world = new WorldGlobe(width, height, startGrassCount);
+        } else if (mapType.equals("Poles")) {
+            this.world = new WorldPoles(width, height, startGrassCount);
+        } else {
+            this.world = new World(width, height, startGrassCount);
+        }
+        this.animalFlag = animalType.equals("Crazy animals");
+        ConsoleMapDisplay observer = new ConsoleMapDisplay();
+        this.world.addObserver(observer);
+
+        this.animalList = new ArrayList<>();
+        AnimalConfig animalConfig =
+                new AnimalConfig(startAnimalEnergy, energyUsedForReproduction, minMutationCount, maxMutationCount,
+                        geneLength);
+        for (int i = 0; i < startAnimalCount; i++) {
+            Vector2d position = new Vector2d(ThreadLocalRandom.current().nextInt(0, width - 1),
+                    ThreadLocalRandom.current().nextInt(0, height - 1));
+            animalList.add(new Animal(position, animalConfig, animalFlag));
+        }
+
+        for (Animal a : animalList) {
+            try {
+                world.place(a);
+            } catch (IncorrectPositionException e) {
+                System.out.println("Incorrect position: " + a.getPosition());
+            }
+        }
+
+        this.grassEnergy = grassEnergy;
+        this.grassGrowth = grassGrowth;
+        this.minEnergyForReproduction = minReproductionEnergy;
+        this.refreshTime = refreshTime;
+        initializeCsvWriter();
+    }
 }
