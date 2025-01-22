@@ -1,6 +1,7 @@
 package agh.fcs.oop.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Animal implements WorldElement {
@@ -14,8 +15,7 @@ public class Animal implements WorldElement {
     private int age = 0;
     private int childrenNumber = 0;
     private int descendantsNumber = 0;
-    private Animal parent1;
-    private Animal parent2;
+    private HashSet<Animal> parents = new HashSet<>();
     private int grassEaten = 0;
     private int deathDay = -1;
 
@@ -102,28 +102,22 @@ public class Animal implements WorldElement {
         }
 
         Animal kid = new Animal(this.position, animalConfig, offspringGene, variantSelector);
-        kid.setParents(this, partner);
+        kid.addParent(this);
+        kid.addParent(partner);
         return kid;
     }
 
-
     public void incrementDescendantsNumber() {
-        this.descendantsNumber++;
-        if(parent1 != null) parent1.incrementDescendantsNumber();
-        if(parent2 != null) parent2.incrementDescendantsNumber();
+        if (this.getEnergy() > 0) {
+            this.descendantsNumber++;
+            for (Animal parent : parents) {
+                parent.incrementDescendantsNumber();
+            }
+        }
     }
 
-    public Animal getParent1() {
-        return parent1;
-    }
-
-    public Animal getParent2() {
-        return parent2;
-    }
-
-    public void setParents(Animal animal1, Animal animal2) {
-        parent1 = animal1;
-        parent2 = animal2;
+    public void addParent(Animal parent) {
+        parents.add(parent);
     }
 
     public boolean isAlive() {
