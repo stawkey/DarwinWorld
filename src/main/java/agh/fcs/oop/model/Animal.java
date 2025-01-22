@@ -13,8 +13,10 @@ public class Animal implements WorldElement {
     private int currGene;
     private int age = 0;
     private int childrenNumber = 0;
+    private int descendantsNumber = 0;
+    private Animal parent1;
+    private Animal parent2;
     private int grassEaten = 0;
-    ;
     private int deathDay = -1;
 
     public Animal(Vector2d position, AnimalConfig animalConfig, boolean variantSelector) {
@@ -77,6 +79,9 @@ public class Animal implements WorldElement {
         this.childrenNumber++;
         partner.childrenNumber++;
 
+        this.incrementDescendantsNumber();
+        partner.incrementDescendantsNumber();
+
         double proportion = (double) this.energy / (this.energy + partner.energy);
         int middlePoint = (int) (proportion * animalConfig.getGeneLength());
 
@@ -96,7 +101,29 @@ public class Animal implements WorldElement {
             offspringGene.set(geneIndex, ThreadLocalRandom.current().nextInt(8));
         }
 
-        return new Animal(this.position, animalConfig, offspringGene, variantSelector);
+        Animal kid = new Animal(this.position, animalConfig, offspringGene, variantSelector);
+        kid.setParents(this, partner);
+        return kid;
+    }
+
+
+    public void incrementDescendantsNumber() {
+        this.descendantsNumber++;
+        if(parent1 != null) parent1.incrementDescendantsNumber();
+        if(parent2 != null) parent2.incrementDescendantsNumber();
+    }
+
+    public Animal getParent1() {
+        return parent1;
+    }
+
+    public Animal getParent2() {
+        return parent2;
+    }
+
+    public void setParents(Animal animal1, Animal animal2) {
+        parent1 = animal1;
+        parent2 = animal2;
     }
 
     public boolean isAlive() {
@@ -129,6 +156,10 @@ public class Animal implements WorldElement {
 
     public int getChildrenNumber() {
         return childrenNumber;
+    }
+
+    public int getDescendantsNumber() {
+        return descendantsNumber;
     }
 
     public ArrayList<Integer> getGene() {
