@@ -222,11 +222,37 @@ public class SimulationSetup {
         }
     }
 
+    private boolean validateDimensions() {
+        // method responsible for data validation: we want our width and height
+        // to be always bigger or equal to 5, but smaller or equal to 30
+        // TODO: extending validation for more parameters?
+        try {
+            int mapWidth = Integer.parseInt(width.getText());
+            int mapHeight = Integer.parseInt(height.getText());
+
+            if (mapWidth < 5 || mapWidth > 30 || mapHeight < 5 || mapHeight > 30) {
+                throw new IllegalArgumentException("Width and height must be between 5 and 30.");
+            }
+            return true;
+        } catch (NumberFormatException e) {
+            System.out.println("Width and height must be valid integers.");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
+
     @FXML
     private void startSimulation() {
         // after starting simulation, we create config from SimulationConfig class,
         // in order to transfer parameters to SimulationPresenter class
         // thanks to that we can run simulation with parameters from setup window
+        
+        if (!validateDimensions()) {
+            System.out.println("Simulation cannot start due to invalid dimensions.");
+            return;
+        }
+        
         SimulationConfig config = new SimulationConfig();
         config.setMapType(((RadioButton) toggleGroup.getSelectedToggle()).getText());
         config.setAnimalType(((RadioButton) toggleGroup2.getSelectedToggle()).getText());
