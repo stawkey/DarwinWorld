@@ -26,7 +26,7 @@ test {
 }
 
 application {
-    mainClass = 'agh.fcs.oop.Main'
+    mainClass = 'agh.fcs.oop.MainSetup'
 }
 
 java {

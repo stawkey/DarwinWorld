@@ -1,7 +1,6 @@
 package agh.fcs.oop.GUI;
 
-import agh.fcs.oop.Simulation;
-import agh.fcs.oop.GUI.SimulationPresenter;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

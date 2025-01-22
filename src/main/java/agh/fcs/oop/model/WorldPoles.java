@@ -2,7 +2,7 @@ package agh.fcs.oop.model;
 
 public class WorldPoles extends World {
 
-    private int poleFields;
+    private final int poleFields;
 
     public WorldPoles(int width, int height, int startingGrassAmount) {
         super(width, height, startingGrassAmount);

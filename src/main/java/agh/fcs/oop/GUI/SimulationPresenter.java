@@ -57,12 +57,15 @@ public class SimulationPresenter implements MapChangeListener {
     @FXML
     public CheckBox highlightPopularGene;
     @FXML
+    public CheckBox highlightEquatorFields;
+    @FXML
     private Label descriptionLabel;
     @FXML
     private GridPane mapGrid;
 
     private Animal selectedAnimal;
     private boolean showPopularGene;
+    private boolean showEquatorFields;
 
     private Simulation simulation;
     private World world;
@@ -95,6 +98,7 @@ public class SimulationPresenter implements MapChangeListener {
     private void initializeSimulation() {
         if (simulation == null) {
             showPopularGene = false;
+            showEquatorFields = false;
             simulation = new Simulation(simulationConfig.getMapType(), simulationConfig.getAnimalType(),
                     simulationConfig.getWidth(), simulationConfig.getHeight(),
                     simulationConfig.getGrassCount(), simulationConfig.getAnimalCount(),
@@ -217,6 +221,11 @@ public class SimulationPresenter implements MapChangeListener {
                     } else if (element instanceof Grass) {
                         cell.setStyle("-fx-background-color: rgba(0, 255, 0, 0.5);");
                     }
+                    if (showEquatorFields) {
+                        if (pos.follows(world.getEquatorLeftCorner()) && pos.precedes(world.getEquatorRightCorner())) {
+                            cell.setStyle("-fx-background-color: rgba(0,147,36,0.5);");
+                        }
+                    }
                 } else {
                     if (pos.follows(world.getEquatorLeftCorner()) && pos.precedes(world.getEquatorRightCorner())) {
                         cell.setStyle("-fx-background-color: rgba(0,147,36,0.5);");
@@ -317,6 +326,11 @@ public class SimulationPresenter implements MapChangeListener {
 
     public void toggleHighlightPopularGene(ActionEvent actionEvent) {
         showPopularGene = !showPopularGene;
+        drawMap();
+    }
+
+    public void toggleHighlightEquatorFields() {
+        showEquatorFields = !showEquatorFields;
         drawMap();
     }
 

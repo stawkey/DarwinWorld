@@ -185,7 +185,7 @@ public class Simulation implements Runnable {
     }
 
     public void initializeCsvWriter() {
-        String fileName = "simulation_" + UUID.randomUUID() + ".csv";
+        String fileName = "simulation_" + world.hashCode() + ".csv";
         try {
             csvWriter = new BufferedWriter(new FileWriter(fileName));
             csvWriter.write("Day;AnimalsCount;GrassCount;EmptyFields;MostPopularGene;AverageEnergy;AverageLifespan;" +

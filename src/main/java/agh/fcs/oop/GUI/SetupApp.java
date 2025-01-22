@@ -24,9 +24,7 @@ public class SetupApp extends Application {
         var scene = new Scene(viewRoot);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Setup window");
-//        primaryStage.minWidthProperty().bind(viewRoot.minWidthProperty());
-//        primaryStage.minHeightProperty().bind(viewRoot.minHeightProperty());
-//        primaryStage.show();
+
     }
 
 }

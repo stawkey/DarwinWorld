@@ -53,6 +53,8 @@
             <Button fx:id="toggleSimulationButton" text="Pause" onAction="#toggleSimulation"/>
             <CheckBox fx:id="highlightPopularGene" text="Highlight popular gene"
                       onAction="#toggleHighlightPopularGene"/>
+            <CheckBox fx:id="highlightEquatorFields" text="Highlight equator fields"
+                      onAction="#toggleHighlightEquatorFields"/>
         </HBox>
     </bottom>
 
