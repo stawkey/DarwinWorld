@@ -106,7 +106,7 @@ public class SimulationPresenter implements MapChangeListener {
                     simulationConfig.getReproductionUsedEnergy(), simulationConfig.getMinMutationCount(),
                     simulationConfig.getMaxMutationCount(), simulationConfig.getGrassEnergy(),
                     simulationConfig.getGrassGrowth(), simulationConfig.getGeneLength(),
-                    simulationConfig.getSleepDuration());
+                    simulationConfig.getSleepDuration(), simulationConfig.isGeneratingCsv());
             this.world = simulation.getWorld();
             SimulationEngine engine = new SimulationEngine(List.of(simulation));
             engine.addListener(this);

@@ -19,6 +19,7 @@ public class SimulationConfig {
     private int grassGrowth;
     private int geneLength;
     private int sleepDuration;
+    private boolean generatingCsv;
 
     public String getMapType() { return mapType; }
     public void setMapType(String mapType) { this.mapType = mapType; }
@@ -64,4 +65,7 @@ public class SimulationConfig {
 
     public int getSleepDuration() { return sleepDuration; }
     public void setSleepDuration(int sleepDuration) { this.sleepDuration = sleepDuration; }
+
+    public boolean isGeneratingCsv() { return generatingCsv; }
+    public void setGeneratingCsv(boolean generatingCsv) { this.generatingCsv = generatingCsv; }
 }

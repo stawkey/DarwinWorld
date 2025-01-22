@@ -1,12 +1,10 @@
 package agh.fcs.oop.GUI;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
@@ -80,10 +78,13 @@ public class SimulationSetup {
     @FXML
     private Button start;
 
+    @FXML
+    private CheckBox generatingStats;
 
     @FXML
     private ImageView owlbear;
 
+    private boolean isCreatingCsv;
 
     public void setDefault() {
         // after clicking "Set default parameters" in our JavaFX window, this
@@ -229,11 +230,22 @@ public class SimulationSetup {
         try {
             int mapWidth = Integer.parseInt(width.getText());
             int mapHeight = Integer.parseInt(height.getText());
+            int simMinMutationCount = Integer.parseInt(minMutationCount.getText());
+            int simMaxMutationCount = Integer.parseInt(maxMutationCount.getText());
+            int simGeneLength = Integer.parseInt(geneLength.getText());
 
             if (mapWidth < 5 || mapWidth > 30 || mapHeight < 5 || mapHeight > 30) {
                 throw new IllegalArgumentException("Width and height must be between 5 and 30.");
             }
+            if (simMinMutationCount > simMaxMutationCount) {
+                throw new IllegalArgumentException("Min mutation number can't be bigger than max mutation number");
+            }
+            if (simGeneLength <= 0 || simGeneLength < simMaxMutationCount) {
+                throw new IllegalArgumentException("Wrong gene length value");
+            }
+
             return true;
+
         } catch (NumberFormatException e) {
             System.out.println("Width and height must be valid integers.");
         } catch (IllegalArgumentException e) {
@@ -269,6 +281,7 @@ public class SimulationSetup {
         config.setGrassGrowth(Integer.parseInt(grassGrowth.getText()));
         config.setGeneLength(Integer.parseInt(geneLength.getText()));
         config.setSleepDuration(Integer.parseInt(sleepDuration.getText()));
+        config.setGeneratingCsv(isCreatingCsv);
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/simulation.fxml"));
@@ -295,6 +308,7 @@ public class SimulationSetup {
         animalChoosing.setText("Choose your animal type: ");
         parameters.setText("Set parameters for your map: ");
 
+        isCreatingCsv = false;
         toggleGroup = new ToggleGroup();
         noVariant.setToggleGroup(toggleGroup);
         globe.setToggleGroup(toggleGroup);
@@ -308,5 +322,9 @@ public class SimulationSetup {
 
         owlbear.setImage(new Image(Objects.requireNonNull(getClass().getResource("/owlbear.png")).toExternalForm()));
 
+    }
+
+    public void toggleGeneratingCsv(ActionEvent actionEvent) {
+        isCreatingCsv = !isCreatingCsv;
     }
 }

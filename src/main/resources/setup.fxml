@@ -94,6 +94,7 @@
             <Button fx:id="defaultData" text="Set default parameters" styleClass="button" onAction="#setDefault" />
             <Button fx:id="importCustom" text="Import custom settings" styleClass="button" onAction="#importSettings" />
             <Button fx:id="exportCustom" text="Export your settings" styleClass="button" onAction="#exportSettings" />
+            <CheckBox fx:id="generatingStats" text="Generate stats into csv"  onAction="#toggleGeneratingCsv"/>
         </HBox>
     </bottom>
 </BorderPane>

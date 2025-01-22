@@ -19,6 +19,7 @@ public class Simulation implements Runnable {
     private final int minEnergyForReproduction;
     private final int refreshTime;
     boolean animalFlag;
+    boolean generatingCsv;
     private volatile boolean paused = false;
     private int totalDeadAnimalsAge = 0;
     private int day = 1;
@@ -99,15 +100,18 @@ public class Simulation implements Runnable {
                 // Grow new grass
                 world.generatingGrass(grassGrowth);
                 notifySimulationStep("");
-
+                if (generatingCsv) {
                 writeStatisticsToCsv(day);
+                }
                 day++;
                 Thread.sleep(refreshTime);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
+        if (generatingCsv) {
         closeCsvWriter();
+        }
     }
 
     public synchronized void pause() {
@@ -224,7 +228,7 @@ public class Simulation implements Runnable {
     public Simulation(String mapType, String animalType, int width, int height, int startGrassCount,
                       int startAnimalCount, int startAnimalEnergy, int minReproductionEnergy,
                       int energyUsedForReproduction, int minMutationCount, int maxMutationCount, int grassEnergy,
-                      int grassGrowth, int geneLength, int refreshTime) {
+                      int grassGrowth, int geneLength, int refreshTime, boolean generatingCsv) {
         if (mapType.equals("Globe")) {
             this.world = new WorldGlobe(width, height, startGrassCount);
         } else if (mapType.equals("Poles")) {
@@ -258,6 +262,9 @@ public class Simulation implements Runnable {
         this.grassGrowth = grassGrowth;
         this.minEnergyForReproduction = minReproductionEnergy;
         this.refreshTime = refreshTime;
-        initializeCsvWriter();
+        this.generatingCsv = generatingCsv;
+        if (generatingCsv) {
+            initializeCsvWriter();
+        }
     }
 }
