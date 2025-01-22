@@ -2,6 +2,9 @@ package agh.fcs.oop;
 
 import agh.fcs.oop.model.*;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -17,6 +20,7 @@ public class Simulation implements Runnable {
     private final ArrayList<Animal> deadAnimals = new ArrayList<>();
     private int totalDeadAnimalsAge = 0;
     private int day = 1;
+    private BufferedWriter csvWriter;
 
     @Override
     public void run() {
@@ -79,12 +83,14 @@ public class Simulation implements Runnable {
                 world.generatingGrass(grassGrowth);
                 notifySimulationStep("");
 
+                writeStatisticsToCsv(day);
                 day++;
                 Thread.sleep(50);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
+        closeCsvWriter();
     }
 
     public synchronized void pause() {
@@ -131,6 +137,7 @@ public class Simulation implements Runnable {
         this.grassEnergy = grassEnergy;
         this.grassGrowth = grassGrowth;
         this.minEnergyForReproduction = minReproductionEnergy;
+        initializeCsvWriter();
     }
 
     public void addListener(MapChangeListener listener) {
@@ -187,6 +194,45 @@ public class Simulation implements Runnable {
 
     public int getDay() {
         return day;
+    }
+
+    public void initializeCsvWriter() {
+        String fileName = "simulation_" + UUID.randomUUID() + ".csv";
+        try {
+            csvWriter = new BufferedWriter(new FileWriter(fileName));
+            // Nagłówki kolumn
+            csvWriter.write("Day;AnimalsCount;GrassCount;EmptyFields;MostPopularGene;AverageEnergy;AverageLifespan;AverageChildrenCount");
+            csvWriter.newLine();
+        } catch (IOException e) {
+            System.err.println("Error initializing CSV writer: " + e.getMessage());
+        }
+    }
+
+    public void writeStatisticsToCsv(int day) {
+        try {
+            csvWriter.write(day + ";" +
+                    world.animalCount() + ";" +
+                    world.grassCount() + ";" +
+                    (world.getHeight() * world.getWidth() - world.takenFields()) + ";" +
+                    getMostPopularGene() + ";" +
+                    getAverageEnergy() + ";" +
+                    getAverageLifeSpan() + ";" +
+                    getAverageChildrenCount());
+            csvWriter.newLine();
+            csvWriter.flush();
+        } catch (IOException e) {
+            System.err.println("Error writing to CSV: " + e.getMessage());
+        }
+    }
+
+    public void closeCsvWriter() {
+        if (csvWriter != null) {
+            try {
+                csvWriter.close();
+            } catch (IOException e) {
+                System.err.println("Error closing CSV writer: " + e.getMessage());
+            }
+        }
     }
 
 }

@@ -15,6 +15,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
 import java.util.List;
 
@@ -84,7 +85,11 @@ public class SimulationPresenter implements MapChangeListener {
     }
 
     public void initialize() {
-        Platform.runLater(this::initializeSimulation);
+        Platform.runLater(() -> {
+            initializeSimulation();
+            Stage stage = (Stage) mapGrid.getScene().getWindow();
+            stage.setOnCloseRequest(event -> onCloseWindow());
+        });
         stopTrackingButton.setVisible(selectedAnimal != null);
         stopTrackingButton.setManaged(selectedAnimal != null);
     }
@@ -303,5 +308,11 @@ public class SimulationPresenter implements MapChangeListener {
     public void toggleHighlightPopularGene(ActionEvent actionEvent) {
         showPopularGene = !showPopularGene;
         drawMap();
+    }
+
+    public void onCloseWindow() {
+        if (simulation != null) {
+            simulation.closeCsvWriter();
+        }
     }
 }
