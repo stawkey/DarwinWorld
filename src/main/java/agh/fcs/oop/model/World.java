@@ -26,6 +26,14 @@ public class World implements WorldMap {
         this.upperRight = new Vector2d(width - 1, height - 1);
         this.equatorLeftCorner = null;
         this.equatorRightCorner = null;
+        calculatingEquators();
+        this.startingGrassAmount = startingGrassAmount;
+        generatingGrass(startingGrassAmount);
+    }
+
+    public void calculatingEquators() {
+        // this method calculates parameters of the bottom left corner
+        // and upper right corner of equator area (where 80% of grass should grow)
         if (height == 1 || height == 2) {
             this.equatorLeftCorner = new Vector2d(0,0);
             this.equatorRightCorner = new Vector2d(width - 1, 0);
@@ -52,30 +60,6 @@ public class World implements WorldMap {
                 this.equatorRightCorner = new Vector2d(width - 1, equatorLeftCorner.y() + (height - 4)/5);
             }
         }
-        this.startingGrassAmount = startingGrassAmount;
-//        int equatorStartingGrasses = (int) Math.ceil(startingGrassAmount * 0.8);
-//        int otherStartingGrasses = startingGrassAmount - equatorStartingGrasses;
-//
-//        StartingGrassGenerator equatorPositionGenerator = new StartingGrassGenerator(equatorLeftCorner.x(),
-//                equatorLeftCorner.y(), equatorRightCorner.x(), equatorRightCorner.y(), equatorStartingGrasses);
-//        for (Vector2d grassPosition : equatorPositionGenerator) {
-//            grassMap.put(grassPosition, new Grass(grassPosition));
-//        }
-//        int upperOtherGrasses = (int) (Math.random() * otherStartingGrasses);
-//        int lowerOtherGrasses = otherStartingGrasses = upperOtherGrasses;
-//
-//        StartingGrassGenerator upperPositionGenerator = new StartingGrassGenerator(0, equatorRightCorner.y() + 1,
-//                width - 1, height - 1, upperOtherGrasses);
-//        for (Vector2d grassPosition : upperPositionGenerator) {
-//            grassMap.put(grassPosition, new Grass(grassPosition));
-//        }
-//
-//        StartingGrassGenerator lowerPositionGenerator = new StartingGrassGenerator(0, 0, width - 1,
-//                equatorLeftCorner.y(), lowerOtherGrasses);
-//        for (Vector2d grassPosition : lowerPositionGenerator) {
-//            grassMap.put(grassPosition, new Grass(grassPosition));
-//        }
-        generatingGrass(startingGrassAmount);
     }
 
     public int getWidth() {
@@ -94,60 +78,37 @@ public class World implements WorldMap {
         return equatorRightCorner;
     }
 
-    public List<Vector2d> preferredGrassPositions() {
-        List<Vector2d> betterGrass = new ArrayList<>();
-        for (int i = equatorLeftCorner.x(); i <= equatorRightCorner.x(); i++) {
-            for (int j = 0; j <= width - 1; j++) {
-                betterGrass.add(new Vector2d(i, j));
-            }
-        }
-        return betterGrass;
-    }
-
-    public List<Vector2d> otherGrassPositions() {
-        List<Vector2d> worseGrass = new ArrayList<>();
-        for (int i = 0; i < equatorLeftCorner.y(); i++) {
-            for (int j = 0; j <= width - 1; j++) {
-                worseGrass.add(new Vector2d(i, j));
-            }
-        }
-        for (int i = equatorRightCorner.y() + 1; i <= height - 1; i++) {
-            for (int j = 0; j <= width - 1; j++) {
-                worseGrass.add(new Vector2d(i, j));
-            }
-        }
-        return worseGrass;
-    }
-
     public void generatingGrass(int grassGrowth) {
+        // this method is responsible for generating grass after each day cycle
+        // at the beginning we take 80% of grass as equator grass, then
+        // we put remaining grass in other places on the map.
+        // all places are randomly generated
         int equatorGrass = (int) Math.ceil(grassGrowth * 0.8);
         int tempGrassAmount = grassMap.size();
 
-        GeneralGrassGenerator equatorPositionGenerator = new GeneralGrassGenerator(equatorLeftCorner.x(),
-                equatorLeftCorner.y(), equatorRightCorner.x(), equatorRightCorner.y(), equatorGrass, grassMap);
-        for (Vector2d grassPosition : equatorPositionGenerator) {
-            grassMap.put(grassPosition, new Grass(grassPosition));
-        }
+        generateGrassInArea(equatorLeftCorner.x(), equatorLeftCorner.y(),
+                equatorRightCorner.x(), equatorRightCorner.y(), equatorGrass);
 
         int placedGrass = grassMap.size() - tempGrassAmount;
         int otherGrass = grassGrowth - placedGrass;
         int upperOtherGrass = (int) Math.round(Math.random() * otherGrass);
         tempGrassAmount = grassMap.size();
 
-        GeneralGrassGenerator upperPositionGenerator = new GeneralGrassGenerator(0, equatorRightCorner.y() + 1,
-                width - 1, height - 1, upperOtherGrass, grassMap);
-        for (Vector2d grassPosition : upperPositionGenerator) {
-            grassMap.put(grassPosition, new Grass(grassPosition));
-        }
+        generateGrassInArea(0, equatorRightCorner.y() + 1, width - 1, height - 1, upperOtherGrass);
         placedGrass = grassMap.size() - tempGrassAmount;
-        int lowerOtherGrasses = otherGrass - placedGrass;
+        int lowerOtherGrass = otherGrass - placedGrass;
 
-        GeneralGrassGenerator lowerPositionGenerator = new GeneralGrassGenerator(0, 0, width - 1,
-                equatorLeftCorner.y() - 1, lowerOtherGrasses, grassMap);
-        for (Vector2d grassPosition : lowerPositionGenerator) {
+        generateGrassInArea(0, 0, width - 1, equatorLeftCorner.y() - 1, lowerOtherGrass);
+    }
+
+    private void generateGrassInArea(int xStart, int yStart, int xEnd, int yEnd, int grassCount) {
+        // using class GeneralGrassGenerator in order to generate grass in random places
+        GeneralGrassGenerator generator = new GeneralGrassGenerator(xStart, yStart, xEnd, yEnd, grassCount, grassMap);
+        for (Vector2d grassPosition : generator) {
             grassMap.put(grassPosition, new Grass(grassPosition));
         }
     }
+
 
     public boolean canMoveTo(Vector2d position) {
         return position.follows(bottomLeft) && position.precedes(upperRight);
@@ -231,8 +192,7 @@ public class World implements WorldMap {
     }
 
     public int takenFields() {
-        Set<Vector2d> uniqueKeys = new HashSet<>();
-        uniqueKeys.addAll(animalMap.keySet());
+        Set<Vector2d> uniqueKeys = new HashSet<>(animalMap.keySet());
         uniqueKeys.addAll(grassMap.keySet());
         return uniqueKeys.size();
     }

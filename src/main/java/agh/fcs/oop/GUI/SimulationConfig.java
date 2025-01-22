@@ -1,5 +1,8 @@
 package agh.fcs.oop.GUI;
 
+// this class is responsible for moving parameters from SimulationSetup
+// to SimulationPresenter in order to run simulation correctly
+
 public class SimulationConfig {
     private String mapType;
     private String animalType;
@@ -17,7 +20,6 @@ public class SimulationConfig {
     private int geneLength;
     private int sleepDuration;
 
-    // TODO: Interaction with map and animal variations
     public String getMapType() { return mapType; }
     public void setMapType(String mapType) { this.mapType = mapType; }
 

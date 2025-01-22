@@ -2,8 +2,6 @@ package agh.fcs.oop.model;
 
 import java.util.*;
 
-// TODO: merging both generators into one + bugfixing
-
 public class GeneralGrassGenerator implements Iterator<Vector2d>, Iterable<Vector2d> {
     protected final int minWidth;
     protected final int minHeight;
@@ -28,15 +26,10 @@ public class GeneralGrassGenerator implements Iterator<Vector2d>, Iterable<Vecto
         Collections.shuffle(possiblePlaces);
     }
 
-//    public GeneralGrassGenerator(int minWidth, int minHeight, int maxWidth, int maxHeight, int grassCount, Map<Vector2d, Grass> grassMap) {
-//        super(minWidth, minHeight, maxWidth, maxHeight, grassCount);
-//        System.out.println(grassMap);
-//        this.grassMap = grassMap;
-//        System.out.println(grassMap);
-//    }
-
-
     public List<Vector2d> generatingPossibilities() {
+        // in this method we generate ArrayList with places where we can possibly
+        // place grass, but first we check if that position is not in our
+        // array with all grass from map
         List<Vector2d> positions = new ArrayList<>();
         for(int x = minWidth; x <= maxWidth; x++) {
             for(int y = minHeight; y <= maxHeight; y++) {
@@ -55,6 +48,9 @@ public class GeneralGrassGenerator implements Iterator<Vector2d>, Iterable<Vecto
 
     @Override
     public Vector2d next() {
+        // on every iteration we generate new grass position and return it
+        // at the same time we remove that position from base array
+        // (so it doesn't appear again)
         if (hasNext()) {
             int chosenPlace = random.nextInt(possiblePlaces.size());
             Vector2d generatedVector = possiblePlaces.get(chosenPlace);

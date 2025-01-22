@@ -84,7 +84,10 @@ public class SimulationSetup {
     @FXML
     private ImageView owlbear;
 
+
     public void setDefault() {
+        // after clicking "Set default parameters" in our JavaFX window, this
+        // method starts and sets parameters on values below
         int defaultWidth = 10;
         width.setText(valueOf(defaultWidth));
         int defaultHeight = 10;
@@ -115,6 +118,8 @@ public class SimulationSetup {
 
     @FXML
     public void importSettings() {
+        // we use this method to import simulation parameters from text file,
+        // reading line by line and setting matching parameters
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Import Settings");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
@@ -166,6 +171,8 @@ public class SimulationSetup {
 
     @FXML
     public void exportSettings() {
+        // this method is analogic to importSettings, but this time it writes
+        // current parameters configuration into text file
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Export Settings");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
@@ -217,9 +224,11 @@ public class SimulationSetup {
 
     @FXML
     private void startSimulation() {
+        // after starting simulation, we create config from SimulationConfig class,
+        // in order to transfer parameters to SimulationPresenter class
+        // thanks to that we can run simulation with parameters from setup window
         SimulationConfig config = new SimulationConfig();
         config.setMapType(((RadioButton) toggleGroup.getSelectedToggle()).getText());
-        System.out.println(config.getMapType());
         config.setAnimalType(((RadioButton) toggleGroup2.getSelectedToggle()).getText());
         config.setWidth(Integer.parseInt(width.getText()));
         config.setHeight(Integer.parseInt(height.getText()));
@@ -254,7 +263,8 @@ public class SimulationSetup {
 
     @FXML
     public void initialize() {
-
+        // we group radio buttons in toggleGroups, set our owlbear image and
+        // set some texts
         worldChoosing.setText("Choose your world type: ");
         animalChoosing.setText("Choose your animal type: ");
         parameters.setText("Set parameters for your map: ");
