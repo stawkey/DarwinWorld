@@ -324,6 +324,7 @@ public class SimulationPresenter implements MapChangeListener {
         selectedAnimalGrassEaten.setText("");
         selectedAnimalChildren.setText("");
         selectedAnimalAge.setText("");
+        selectedAnimalDescendants.setText("");
         selectedAnimalDeathDay.setText("");
     }
 
